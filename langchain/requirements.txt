@@ -1,0 +1,43 @@
+ #Langchain core dependencies
+langchain
+langchain_core
+
+
+#OpenAI API client
+langchain-openai
+openai
+
+
+#Anthropic API client
+langchain-anthropic
+
+
+#Google GEM API client
+langchain-google-genai
+google-generativeai
+
+
+#Hugging Face API client
+langchain-huggingface
+transformers
+huggingface_hub
+
+#Environment variable management
+python-dotenv
+
+
+
+
+#Mechine learning frameworks (optional, depending on your use case)
+numpy
+scikit-learn
+pandas
+
+
+#streamlit for building web applications (optional)
+streamlit
+
+
+#Additional utilities (optional, depending on your use case)
+pydantic
+email-validator

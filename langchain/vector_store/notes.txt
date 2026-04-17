@@ -1,0 +1,1 @@
+pip install langchain chromadb openai tiktoken pypdf langchain_openai langchain-community
