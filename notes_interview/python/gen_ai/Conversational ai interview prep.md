@@ -30,6 +30,36 @@
 
 ---
 
+### 🔷 CONCEPT OVERVIEW: Chatbot Architecture
+
+> **What:** A chatbot is a software system that simulates human conversation through text or voice. Architecture refers to how its components — input processing, language understanding, dialogue management, response generation, and output — are structured and connected.
+
+> **Why:** Without a well-designed architecture, chatbots fail at scale — they give inconsistent answers, can't handle unexpected inputs, become impossible to maintain, and break when business requirements change. Architecture defines the reliability and extensibility of the whole system.
+
+> **How (General Flow):**
+> 1. User sends input (text or voice)
+> 2. Input is normalized and classified (intent detection)
+> 3. Relevant context and knowledge is retrieved
+> 4. A response is generated (rule-based or LLM)
+> 5. Response is post-processed and delivered to user
+> 6. Conversation state is updated for the next turn
+
+> **Benefits:**
+> - Modular design allows swapping components independently (e.g., upgrade LLM without touching STT)
+> - Clear separation of concerns makes debugging and testing tractable
+> - Enables hybrid approaches (fast rule paths for common queries, LLM for complex ones)
+
+> **Key Terms:**
+> - **Intent:** The goal or action the user wants to perform ("cancel policy", "check balance")
+> - **Slot / Entity:** Specific data extracted from the user's message (policy_id, date, amount)
+> - **Dialogue Manager (DM):** The component that decides what the bot does next given current conversation state
+> - **NLU (Natural Language Understanding):** Extracting structured meaning (intent + entities) from raw text
+> - **NLG (Natural Language Generation):** Producing a natural language response from structured data
+> - **Fallback:** The bot's behaviour when it cannot understand or fulfil a request
+> - **Guardrail:** A safety check that prevents the bot from producing harmful or off-topic responses
+
+---
+
 ### Q1. What is the fundamental difference between a rule-based chatbot and an LLM-based chatbot?
 
 **Answer:**
@@ -292,6 +322,39 @@ IAG's chatbot would be strictly closed-domain. Allowing it to become open-domain
 
 ---
 
+### 🔷 CONCEPT OVERVIEW: Speech-to-Text (STT)
+
+> **What:** STT (also called Automatic Speech Recognition, ASR) is the technology that converts spoken audio into written text. It is the "ears" of a voice AI system.
+
+> **Why:** Voice is the most natural human communication channel. Without STT, voice bots cannot understand what customers say. STT quality directly determines the accuracy of everything downstream — a 10% word error rate means 1 in 10 words is wrong before the bot even tries to respond.
+
+> **How (End-to-End Pipeline):**
+> 1. Raw audio captured from microphone at 16kHz
+> 2. Voice Activity Detection (VAD) segments speech from silence
+> 3. Audio is pre-processed (noise reduction, echo cancellation)
+> 4. Mel spectrogram features are extracted from the audio
+> 5. Acoustic model (neural network) converts features to text tokens
+> 6. Optional language model rescoring improves accuracy on domain vocabulary
+> 7. Final transcript with confidence scores and word timestamps is returned
+
+> **Benefits:**
+> - Enables fully hands-free, natural customer interactions
+> - More accessible than text-based interfaces for many users
+> - Can be deployed on phone (PSTN), web (WebRTC), and mobile simultaneously
+
+> **Key Terms:**
+> - **WER (Word Error Rate):** Primary accuracy metric — (substitutions + deletions + insertions) / total reference words
+> - **VAD (Voice Activity Detection):** Detecting when a person starts and stops speaking
+> - **Mel Spectrogram:** A 2D time-frequency representation of audio that mirrors human hearing
+> - **MFCC (Mel Frequency Cepstral Coefficients):** Traditional audio features derived from mel spectrograms
+> - **RTF (Real-Time Factor):** Inference time / audio duration; RTF < 1.0 means faster than real-time
+> - **Whisper:** OpenAI's open-source STT model trained on 680K hours of multilingual audio
+> - **faster-whisper:** CTranslate2-based Whisper implementation, 3–5x faster than the original
+> - **CTC (Connectionist Temporal Classification):** Training objective enabling end-to-end STT without frame-level alignment
+> - **Domain Adaptation:** Fine-tuning or configuring an STT model to better recognise domain-specific vocabulary
+
+---
+
 ### Q11. How does a modern STT system work at a high level?
 
 **Answer:**
@@ -323,6 +386,33 @@ A modern STT system converts audio waveforms into text through these stages:
 OpenAI's Whisper is the current de facto open-source STT standard — trained on 680K hours of multilingual data, handles accents well, and is freely available. For production, you run it via `faster-whisper` (CTranslate2 backend) for ~3–5x faster inference.
 
 ---
+
+### 🔷 CONCEPT OVERVIEW: Voice Activity Detection (VAD)
+
+> **What:** VAD is an algorithm that determines, frame by frame, whether a segment of audio contains human speech or silence/noise. It acts as the gatekeeper before STT processing.
+
+> **Why:** Without VAD, the STT model processes everything including silence, background noise, and keyboard clicks — wasting compute and increasing errors. More critically, VAD determines *when the user has stopped speaking* so the system knows when to respond. Wrong VAD = the bot interrupts the user or waits too long.
+
+> **How (Step-by-Step):**
+> 1. Audio arrives as a continuous stream (e.g., 160ms frames)
+> 2. Each frame is scored: probability that it contains speech (0.0 to 1.0)
+> 3. Frames above a threshold (e.g., 0.5) are marked as speech
+> 4. A minimum silence duration (e.g., 300ms) must pass before declaring end-of-utterance
+> 5. Speech segments between start and end markers are sent to STT
+
+> **Benefits:**
+> - Reduces STT compute by only processing actual speech
+> - Enables natural turn-taking — bot knows when user has finished speaking
+> - Prevents false transcriptions from background noise
+
+> **Key Terms:**
+> - **End-of-Utterance:** The moment the user has finished speaking and STT can run
+> - **Barge-in:** When the user speaks while the bot is still talking — requires VAD to detect and interrupt TTS
+> - **Silero VAD:** Lightweight ONNX-based VAD model, ~1MB, ~1ms per frame
+> - **WebRTC VAD:** Browser-native VAD, very fast, built into Chrome
+> - **Padding:** Extra audio buffered before/after detected speech to avoid clipping sentence starts/ends
+> - **False Positive:** VAD incorrectly marks noise as speech
+> - **False Negative:** VAD misses actual speech (e.g., very quiet user)
 
 ### Q12. What is Voice Activity Detection (VAD) and why is it critical?
 
@@ -567,6 +657,38 @@ CTC-based models (wav2vec2, QuartzNet) are excellent for streaming because each 
 
 ---
 
+### 🔷 CONCEPT OVERVIEW: Text-to-Speech (TTS)
+
+> **What:** TTS converts written text into spoken audio. It is the "voice" of a voice AI system — what the customer actually hears.
+
+> **Why:** Without high-quality TTS, even a perfect AI response sounds robotic and untrustworthy. Poor prosody (tone, rhythm, pace) damages customer trust and brand perception, especially in sensitive contexts like insurance claims. TTS latency is also the final bottleneck in the response pipeline — slow TTS means long silences before the customer hears anything.
+
+> **How (Two-Stage Pipeline):**
+> 1. Text normalization: expand abbreviations, numbers, dates ("€1,200" → "mille deux cents euros")
+> 2. Grapheme-to-phoneme (G2P): convert text to phonetic representation
+> 3. Acoustic model: convert phonemes to a mel spectrogram (2D time-frequency representation)
+> 4. Vocoder: convert mel spectrogram to a 1D audio waveform
+> 5. Audio stream delivered to speaker or phone call
+
+> **Benefits:**
+> - Modern neural TTS approaches MOS scores of 4.0–4.5 (near-human quality)
+> - Voice cloning lets companies create a consistent branded voice
+> - Streaming TTS enables near-instant audio delivery (< 200ms to first sound)
+
+> **Key Terms:**
+> - **MOS (Mean Opinion Score):** Human rating of naturalness 1–5; target > 4.0 for customer-facing systems
+> - **Prosody:** The rhythm, stress, intonation, and pace of speech — what makes it sound human vs robotic
+> - **Mel Spectrogram:** 2D time-frequency representation used as intermediate TTS representation
+> - **Vocoder:** Neural network that converts a mel spectrogram into a raw audio waveform
+> - **HiFi-GAN:** Popular vocoder — fast (~40x real-time on CPU), high quality
+> - **VITS:** End-to-end TTS model — text directly to audio in a single model, no explicit mel step
+> - **XTTS v2:** Open-source multilingual TTS by Coqui with voice cloning from 3-second reference audio
+> - **SSML (Speech Synthesis Markup Language):** XML-based markup for controlling prosody, pauses, and emphasis
+> - **TTFA (Time to First Audio):** Latency from text input to first audio byte being playable
+> - **Streaming TTS:** Synthesising and playing audio chunk-by-chunk as text arrives, rather than waiting for the full response
+
+---
+
 ### Q21. How does a modern neural TTS system work?
 
 **Answer:**
@@ -754,6 +876,30 @@ In a customer service bot, prosody matters enormously for customer satisfaction.
 
 ---
 
+### 🔷 CONCEPT OVERVIEW: Conversational AI Design Patterns
+
+> **What:** Design patterns in conversational AI are reusable architectural solutions to recurring problems — how agents reason and act (ReAct), how complex tasks are decomposed (Planner-Executor), how state is managed across turns, and how interruptions are handled.
+
+> **Why:** Building a chatbot from scratch without patterns leads to brittle, hard-to-maintain systems. Patterns encode lessons learned from production deployments, provide a shared vocabulary for teams, and solve well-understood problems (e.g., tool use, multi-step task management) in a principled way.
+
+> **How:** Each pattern defines: (1) the problem it solves, (2) the components involved, (3) how they interact. Applied together, they form the architecture of a robust conversational AI system.
+
+> **Benefits:**
+> - Faster development — patterns are proven solutions, not experiments
+> - Better reliability — edge cases (interruptions, state loss) are explicitly handled
+> - Team alignment — shared vocabulary reduces miscommunication
+
+> **Key Terms:**
+> - **ReAct (Reasoning + Acting):** Pattern where LLM alternates between reasoning steps and tool-use steps with observations
+> - **Planner-Executor:** One agent decomposes a task; one or more specialised agents execute sub-tasks
+> - **Stateful Agent:** Maintains context and progress across multiple turns and sessions
+> - **Stateless Agent:** Each request is independent; context is passed in by the client
+> - **Barge-in:** User interrupts the bot while it is speaking
+> - **Human-in-the-Loop:** A design point where the system pauses and waits for human approval before proceeding
+> - **Tool Call:** A structured action the LLM requests (e.g., lookup_policy, file_claim) that runs real code
+
+---
+
 ### Q27. What is the "think-act-observe" pattern in conversational AI agents?
 
 **Answer:**
@@ -876,6 +1022,38 @@ In voice bots for French customers, barge-in is culturally important — French 
 ---
 
 ## 5. Cascading Architecture
+
+---
+
+### 🔷 CONCEPT OVERVIEW: Cascading Architecture
+
+> **What:** A cascading architecture is a multi-stage pipeline where each stage performs a specific transformation and passes its output to the next stage. In voice AI, the classic cascade is: Audio → VAD → STT → NLU → Dialogue Manager → NLG/LLM → TTS → Audio.
+
+> **Why:** Complex AI tasks cannot be solved by a single model. Each stage — understanding speech, extracting intent, managing dialogue, generating responses, synthesising audio — requires different specialised models and optimisations. The cascade makes each stage independently replaceable, testable, and scalable.
+
+> **How (Classic Voice Bot Cascade):**
+> 1. Raw audio stream arrives from phone or browser
+> 2. VAD detects speech segments
+> 3. STT transcribes speech to text
+> 4. NLU extracts intent and entities from the transcript
+> 5. Dialogue Manager determines the next action based on current state
+> 6. LLM/NLG generates the natural language response
+> 7. TTS synthesises the response into audio
+> 8. Audio is streamed back to the caller
+
+> **Benefits:**
+> - Each stage is independently optimisable and swappable
+> - Different teams can own different stages
+> - Natural monitoring and logging points at every stage boundary
+> - A stage can be bypassed via shortcuts for common/fast paths
+
+> **Key Terms:**
+> - **Error Propagation:** Errors at upstream stages compound through downstream stages (10% STT error + 90% NLU accuracy = ~81% end-to-end accuracy)
+> - **Confidence Score:** Each stage's measure of certainty in its output; used to trigger fallbacks
+> - **N-best Hypotheses:** Returning the top N possible outputs from a stage (e.g., top-3 transcripts from STT) for downstream stages to re-score
+> - **Shortcut / Fast Path:** Skipping one or more stages when an early confident decision can be made (e.g., exact keyword match)
+> - **Early Exit:** Halting the cascade before reaching all stages (e.g., returning a cached FAQ answer before calling the LLM)
+> - **Joint Model:** Replacing two cascaded stages with a single end-to-end model (e.g., SLU: speech → intent without explicit STT)
 
 ---
 
@@ -1077,9 +1255,39 @@ In high-volume call centers, 60-70% of calls are common inquiries (balance check
 **Real-World Insight:**  
 In production, golden set testing is essential — a curated set of 50-100 test cases with known correct outcomes, run on every deployment. Automated CI/CD with these tests prevents regressions.
 
+## 6. System Design for Scalable AI Agents
+
 ---
 
-## 6. System Design for Scalable AI Agents
+### 🔷 CONCEPT OVERVIEW: Scalable AI Agent System Design
+
+> **What:** Scalable system design for AI agents means architecting the infrastructure — load balancing, state management, GPU clusters, queues, autoscaling — so that the voice/chat bot can handle thousands of concurrent users reliably, without degrading quality or incurring runaway costs.
+
+> **Why:** A chatbot demo running on a single laptop fails instantly at production scale. Real-world demands include thousands of concurrent voice sessions, bursty traffic (disaster events spike insurance calls 10x), GPU resource contention, and zero-downtime deployments. Without deliberate design, the system collapses under load.
+
+> **How (Key Design Decisions):**
+> 1. Stateless bot pods — session state stored in Redis, not in-process
+> 2. Shared GPU pools for expensive STT/LLM/TTS — job queues manage access
+> 3. Kubernetes autoscaling — scale pods based on queue depth and GPU utilisation
+> 4. Circuit breakers — automatically stop calling failing downstream services
+> 5. Rate limiting — per-customer quotas prevent abuse and protect API budgets
+> 6. Multi-provider fallback — if OpenAI is down, route to Azure or local model
+
+> **Benefits:**
+> - System stays available during traffic spikes and partial outages
+> - Horizontal scaling means capacity grows with demand automatically
+> - Cost is proportional to actual load (not worst-case provisioning)
+
+> **Key Terms:**
+> - **Horizontal Scaling:** Adding more instances of a service to handle more load
+> - **Stateless Service:** A service that holds no session data — any instance can serve any request
+> - **Circuit Breaker:** Pattern that stops calling a failing service to prevent cascading failures
+> - **Autoscaling:** Automatically adding or removing service instances based on metrics (CPU, queue depth)
+> - **Rate Limiting:** Enforcing a maximum number of requests per time window per client
+> - **Kubernetes (K8s):** Container orchestration platform used to deploy, scale, and manage services
+> - **vLLM:** Open-source LLM inference server with PagedAttention and continuous batching for high throughput
+> - **PagedAttention:** vLLM's memory management technique that increases concurrent request capacity by ~3–5x
+> - **Continuous Batching:** Processing LLM requests dynamically as they arrive rather than in fixed batches
 
 ---
 
@@ -1223,6 +1431,36 @@ For IAG's system, every call end should publish to a Kafka topic consumed by: (1
 
 ---
 
+### 🔷 CONCEPT OVERVIEW: Latency Optimization in Voice AI
+
+> **What:** Latency optimization is the practice of systematically identifying and reducing the time delays in each stage of the voice AI pipeline so that the user experiences a fast, natural-feeling conversation.
+
+> **Why:** Human conversation has a natural response tempo of 200–500ms. A voice bot that takes 3 seconds to respond feels broken. Every 100ms of latency reduction is perceptible by users. For telephone-quality interactions, the end-to-end response time (from user stops speaking to bot starts speaking) must be under 1.5 seconds.
+
+> **How (Optimization Stack):**
+> 1. Profile each stage to find the dominant bottlenecks
+> 2. Reduce VAD silence detection threshold (fastest single win)
+> 3. Stream LLM output — start TTS on the first sentence, don't wait for full response
+> 4. Use faster/smaller models where quality allows (Whisper small vs large)
+> 5. Cache frequent responses in Redis
+> 6. Co-locate STT/LLM/TTS servers to eliminate network RTT between stages
+
+> **Benefits:**
+> - Direct impact on user satisfaction (lower CSAT drop-off rates)
+> - Lower perceived wait time = higher task completion rates
+> - Reduced GPU time per request = lower cost per conversation
+
+> **Key Terms:**
+> - **TTFT (Time to First Token):** Time from sending a prompt to receiving the first token of LLM response
+> - **TTFA (Time to First Audio):** Time from LLM response starting to first audio byte being playable by the user
+> - **E2E Latency:** Full end-to-end time from user stopping speaking to user hearing the bot's first word
+> - **P95 / P99 Latency:** The latency exceeded by only 5% / 1% of requests — more useful than average
+> - **Speculative Decoding:** Draft model proposes tokens; large model verifies in parallel — 2–3x generation speedup
+> - **Prompt Caching:** Reusing the KV cache for a repeated system prompt prefix — eliminates prefill cost
+> - **Streaming TTS:** Synthesising audio sentence-by-sentence as LLM tokens arrive
+
+---
+
 ### Q41. What is TTFT (Time to First Token) and why does it matter in voice AI?
 
 **Answer:**
@@ -1315,6 +1553,33 @@ Semantic caching with a threshold of cosine similarity > 0.95 can deflect 20–4
 
 ---
 
+### 🔷 CONCEPT OVERVIEW: Streaming vs Batch Processing
+
+> **What:** Streaming processing handles data in real-time as it arrives (event-by-event or in small chunks). Batch processing accumulates data and processes it in large groups, typically on a schedule (hourly, nightly). Voice AI uses both: streaming for live conversations, batch for post-call analytics.
+
+> **Why:** Live customers cannot wait for a batch job to complete. But real-time processing is expensive and complex. Choosing the right model for each part of the system — streaming for latency-sensitive paths, batch for throughput-sensitive jobs — is a core architectural decision that affects cost, complexity, and user experience.
+
+> **How (Hybrid Hot/Cold Architecture):**
+> 1. Live call arrives → streaming pipeline handles it end-to-end (VAD → STT → LLM → TTS)
+> 2. Every conversation event is published to Kafka (hot path for monitoring + cold path for analytics)
+> 3. Cold path: events land in S3 as Parquet files → dbt models transform them → warehouse for BI
+> 4. Batch jobs run nightly: re-score all calls, re-index knowledge base, retrain intent classifiers
+
+> **Benefits:**
+> - Streaming delivers the sub-second latency real users need
+> - Batch delivers the high-throughput, cost-efficient processing analytics needs
+> - Kafka connects both paths — no data is lost between the two
+
+> **Key Terms:**
+> - **Hot Path:** Real-time streaming pipeline for live interactions
+> - **Cold Path:** Batch pipeline for analytics, reporting, and model retraining
+> - **Kafka:** Distributed event streaming platform; the standard backbone connecting hot and cold paths
+> - **Server-Sent Events (SSE):** HTTP mechanism for streaming LLM token output to clients
+> - **Sentence Chunking:** Splitting LLM output at sentence boundaries to feed TTS incrementally
+> - **Backpressure:** Slowing down producers when consumers can't keep up — prevents queue overflow
+
+---
+
 ### Q44. When would you choose streaming vs batch processing in an AI pipeline?
 
 **Answer:**
@@ -1396,6 +1661,34 @@ The LLM→TTS streaming pipeline is the most impactful optimization for voice bo
 ---
 
 ## 9. API Orchestration
+
+---
+
+### 🔷 CONCEPT OVERVIEW: API Orchestration in AI Systems
+
+> **What:** API orchestration is the coordination of multiple external and internal APIs — LLM providers, CRM systems, databases, TTS/STT services — within a single AI pipeline. It includes tool use (function calling), retry logic, rate limiting, and multi-provider fallback.
+
+> **Why:** A production voice bot is not a single model call — it's an orchestration of 10+ services. Without proper orchestration, a single API timeout causes the whole conversation to fail, rate limits hit during peak hours, and costs spiral from redundant API calls. Orchestration makes the system reliable, cost-efficient, and maintainable.
+
+> **How (Tool Call Flow):**
+> 1. LLM generates a structured tool call request: `{"name": "get_policy", "arguments": {"policy_id": "AIA-2847"}}`
+> 2. Orchestrator validates the arguments
+> 3. Orchestrator executes the function (calls IAG's internal API)
+> 4. Result is appended to conversation as a tool result message
+> 5. LLM is called again with the tool result to generate a final response
+
+> **Benefits:**
+> - LLM is grounded in real data — reduces hallucination
+> - Tool calls are auditable — every API call is logged with inputs and outputs
+> - Failures are handled gracefully — timeout → fallback message, not silent failure
+
+> **Key Terms:**
+> - **Function Calling / Tool Use:** LLM capability to output a structured API call request instead of plain text
+> - **API Gateway:** Reverse proxy handling auth, rate limiting, routing, and observability for all API traffic
+> - **LiteLLM:** Open-source LLM proxy that provides multi-provider routing, cost tracking, and fallback
+> - **Circuit Breaker:** Stops calling a failing API to prevent cascading failures
+> - **Exponential Backoff:** Retry strategy that doubles the wait time between retries
+> - **Webhook:** HTTP callback sent when an async event completes (e.g., "claim filed successfully")
 
 ---
 
@@ -1487,6 +1780,36 @@ LiteLLM proxy is the current favorite for AI teams — it provides multi-provide
 
 ---
 
+### 🔷 CONCEPT OVERVIEW: Memory and Context Management
+
+> **What:** Memory management in conversational AI refers to how the system stores, retrieves, and selectively uses information from past interactions — both within a single conversation (short-term) and across multiple sessions (long-term).
+
+> **Why:** LLMs are stateless by nature — they have no memory between API calls. Every turn, the system must explicitly pass the relevant context. Too little context and the bot forgets what was said; too much context and it becomes slow and expensive. Smart memory management balances relevance, cost, and latency.
+
+> **How (Typical Memory Architecture):**
+> 1. Each message is appended to an in-memory conversation buffer
+> 2. When buffer exceeds N turns, older turns are summarised into a compact paragraph
+> 3. Summary + recent turns are included in every LLM prompt
+> 4. User profile and long-term facts (name, policy_id, preferences) are fetched from Postgres/Redis
+> 5. All of the above are assembled into the LLM context window for each turn
+
+> **Benefits:**
+> - Bot can reference what was said 10 turns ago without bloating every prompt
+> - Long-term memory enables personalisation ("last time you called about claim #2847")
+> - Selective retrieval (only fetch relevant memories) keeps prompts concise and fast
+
+> **Key Terms:**
+> - **Context Window:** The maximum number of tokens an LLM can process in a single call (e.g., 128K tokens for GPT-4o)
+> - **Sliding Window:** Keeping only the most recent N turns of conversation in the prompt
+> - **Summarisation Memory:** Compressing older turns into a summary to free up context window space
+> - **Episodic Memory:** Records of specific past interactions ("you filed claim #2847 on 3 January")
+> - **Semantic Memory:** Domain knowledge stored in a vector DB and retrieved via similarity search
+> - **Mem0:** Open-source memory layer for LLM applications
+> - **Redis:** In-memory key-value store used for fast session state and caching
+> - **Token Budget:** The allocated number of tokens for each component of the prompt (system, history, retrieved context, user message)
+
+---
+
 ### Q48. What are the different types of memory in a conversational AI system?
 
 **Answer:**
@@ -1558,9 +1881,37 @@ When a conversation exceeds the model's context window, you must decide what to 
 **Real-World Insight:**  
 For a voice bot handling claim filing (potentially 50+ turns), the sliding window alone drops important early context (policy number, claim type). Fact extraction + sliding window is the practical minimum. Implement as a background task that runs every 10 turns.
 
+## 11. Evaluation and Scoring Systems
+
 ---
 
-## 11. Evaluation and Scoring Systems
+### 🔷 CONCEPT OVERVIEW: Evaluation and Scoring
+
+> **What:** Evaluation is the systematic process of measuring how well a conversational AI system performs — using automated metrics, LLM-as-judge, human review, and business outcome tracking.
+
+> **Why:** Without evaluation, improvements are guesswork and regressions go undetected. A prompt change that feels better to the developer might hurt task completion by 15%. Evaluation creates an objective feedback loop that enables safe, evidence-based iteration.
+
+> **How (Multi-Layer Evaluation):**
+> 1. Offline eval: Run against a golden dataset of (input, expected_output) pairs after every change
+> 2. Automated metrics: WER for STT, MOS-LQO for TTS, faithfulness/relevancy for LLM (via RAGAS/DeepEval)
+> 3. LLM-as-judge: Use GPT-4 to score responses on empathy, accuracy, conciseness, professionalism
+> 4. Online monitoring: Sample 1–5% of live traffic; run judge asynchronously; alert on score drops
+> 5. Business metrics: CSAT, task completion rate, escalation rate — the ultimate truth
+
+> **Benefits:**
+> - Catches regressions before they reach users
+> - Enables A/B testing of models and prompts with statistical rigour
+> - Turns production failures into training data (data flywheel)
+
+> **Key Terms:**
+> - **CSAT (Customer Satisfaction Score):** Post-conversation rating by the user; the most business-relevant metric
+> - **Task Completion Rate:** % of conversations where the user's goal was successfully achieved
+> - **First-Call Resolution:** % of conversations resolved without needing a follow-up contact
+> - **Escalation Rate:** % of conversations routed to a human agent
+> - **LLM-as-Judge:** Using a capable LLM (GPT-4o, Claude Opus) to score outputs of another LLM
+> - **BLEU / ROUGE:** N-gram overlap metrics; useful for regression testing but poor absolute quality measures
+> - **BERTScore:** Semantic similarity metric using BERT embeddings; better than BLEU for open-ended responses
+> - **Golden Dataset:** A curated, human-reviewed set of (input, expected_output) pairs used as ground truth
 
 ---
 
@@ -1643,6 +1994,38 @@ In production, outcome-based metrics (CSAT, first-call resolution, escalation ra
 
 ---
 
+### 🔷 CONCEPT OVERVIEW: Production Deployment of AI Systems
+
+> **What:** Production deployment is the process of taking a developed AI system and running it reliably at scale for real users — including containerisation, CI/CD pipelines, safe rollout strategies (canary, blue-green), and infrastructure as code.
+
+> **Why:** Deploying an AI system is more risky than traditional software because behaviour changes are subtle and hard to predict. A prompt change that looks fine in testing can silently degrade CSAT for thousands of users before anyone notices. Production deployment discipline — canary releases, eval gates, automatic rollback — is how teams ship changes safely.
+
+> **How (Deployment Pipeline):**
+> 1. Developer changes prompt or model version in Git
+> 2. CI: automated eval suite runs against golden dataset; must pass before merge
+> 3. CD: change is deployed to staging environment; integration tests run
+> 4. Canary: 5% of production traffic routed to new version
+> 5. Monitor: LLM judge scores and error rates compared to baseline for 24h
+> 6. Promote: If metrics match or improve, gradually ramp to 100%
+> 7. Rollback: If metrics degrade, instantly revert to previous version
+
+> **Benefits:**
+> - Regressions are caught before they affect all users
+> - Confidence to iterate rapidly because rollback is always one click away
+> - Clear ownership: every change has an audit trail
+
+> **Key Terms:**
+> - **Canary Deployment:** Routing a small % of traffic to a new version for risk-limited testing
+> - **Blue-Green Deployment:** Running old (blue) and new (green) simultaneously; instant traffic switch
+> - **Feature Flag:** Toggles that enable/disable features without deploying new code
+> - **Helm Chart:** Kubernetes packaging format for deploying services
+> - **ArgoCD:** GitOps continuous deployment tool for Kubernetes
+> - **vLLM:** High-performance self-hosted LLM inference server; de facto standard for open-source models
+> - **Container (Docker):** Portable package containing the application and all its dependencies
+> - **Kubernetes (K8s):** Platform for orchestrating containers at scale
+
+---
+
 ### Q52. How do you deploy an LLM-based chatbot in production?
 
 **Answer:**
@@ -1721,6 +2104,37 @@ For IAG's voice bot, self-hosting Mistral 7B or Llama 3 8B on 2 A10 GPUs with vL
 ---
 
 ## 13. Monitoring, Logging, and Observability
+
+---
+
+### 🔷 CONCEPT OVERVIEW: Observability in AI Systems
+
+> **What:** Observability is the ability to understand the internal state of a system from its external outputs — through metrics, logs, and distributed traces. For AI systems, this extends to tracking LLM quality, STT accuracy, TTS latency, and business metrics like CSAT.
+
+> **Why:** AI systems fail in subtle, non-deterministic ways. A model starts hallucinating more. STT accuracy drops on a new phone model. LLM latency spikes at peak hours. Without observability, these problems are invisible until customers complain. Observability makes problems detectable, diagnosable, and preventable.
+
+> **How (Observability Stack):**
+> 1. Every service emits structured logs (JSON) to a central log aggregator (ELK, Loki)
+> 2. Key metrics are exported via Prometheus (latency, error rates, GPU utilisation)
+> 3. Grafana dashboards visualise the "golden four": error rate, latency P95, throughput, saturation
+> 4. OpenTelemetry instruments every service with distributed traces
+> 5. Traces are stored in Jaeger or Datadog APM — visualised as waterfall views per request
+> 6. Alerts fire on Slack/PagerDuty when thresholds are breached
+
+> **Benefits:**
+> - Pinpoint exactly which stage is slow (STT? LLM? TTS?) in seconds, not hours
+> - Proactively detect quality degradation before customers notice
+> - Audit trail for regulatory compliance (every LLM call logged with inputs and outputs)
+
+> **Key Terms:**
+> - **Distributed Tracing:** Tracking a single request as it flows through multiple services
+> - **OpenTelemetry:** Open standard for emitting metrics, logs, and traces from any service
+> - **Span:** A single unit of work within a distributed trace (e.g., "STT processing")
+> - **Prometheus:** Time-series metrics database; pulls metrics from services via HTTP
+> - **Grafana:** Dashboard and alerting platform for visualising Prometheus metrics
+> - **Jaeger:** Open-source distributed tracing backend; visualises traces as waterfall diagrams
+> - **P95 / P99 Latency:** The response time at the 95th / 99th percentile — better than average for catching tail latency
+> - **Golden Signals:** The four key metrics: error rate, latency, throughput, and saturation
 
 ---
 
@@ -1842,6 +2256,38 @@ In France, RGPD (GDPR) + insurance-specific regulations (Directive Distribution 
 ---
 
 ## 14. Real-Time Voice Agent Architecture
+
+---
+
+### 🔷 CONCEPT OVERVIEW: Real-Time Voice Agent Architecture
+
+> **What:** A real-time voice agent is a complete system that can receive a phone call or web audio stream, understand the caller's speech, reason about it, call business APIs, generate a response, and speak it back — all within 500–1500ms per turn, continuously.
+
+> **Why:** This is the hardest integration challenge in conversational AI. It requires all components (VAD, STT, LLM, TTS) to work simultaneously in a streaming fashion, with tight latency budgets, full-duplex audio handling (barge-in), and robust failure recovery. It is the flagship architecture for insurance contact centres.
+
+> **How (Full Pipeline):**
+> 1. Audio arrives from phone (PSTN via Twilio/SIP) or browser (WebRTC WebSocket)
+> 2. Echo cancellation + noise reduction runs in real-time
+> 3. VAD segments speech and triggers STT on end-of-utterance
+> 4. STT returns transcript; context manager assembles the full prompt
+> 5. LLM streams response tokens; sentence chunker feeds TTS
+> 6. TTS audio streams back to caller; barge-in monitor watches for interruptions
+> 7. All events logged asynchronously via OpenTelemetry → Kafka → S3
+
+> **Benefits:**
+> - Natural, phone-quality conversation experience
+> - Fully automated first-line support — 80% deflection rate at scale
+> - 24/7 availability with consistent quality
+
+> **Key Terms:**
+> - **PSTN (Public Switched Telephone Network):** Traditional phone network
+> - **WebRTC:** Browser standard for real-time audio/video communication without plugins
+> - **SIP (Session Initiation Protocol):** Protocol for establishing and managing VoIP calls
+> - **AEC (Acoustic Echo Cancellation):** Removing the bot's own TTS output from the microphone feed
+> - **Full-Duplex:** Both parties can speak simultaneously (requires AEC to prevent feedback)
+> - **Twilio:** CPaaS provider that bridges phone calls to WebSocket audio streams
+> - **WebSocket:** Persistent, full-duplex TCP connection used for bidirectional audio streaming
+> - **Barge-in:** Detecting user speech while the bot is talking and immediately stopping TTS playback
 
 ---
 
@@ -1988,6 +2434,39 @@ For IAG's web/app channel, implement WebSocket for the voice channel. For REST, 
 ---
 
 ## 15. Prompt Engineering in Production
+
+---
+
+### 🔷 CONCEPT OVERVIEW: Prompt Engineering in Production
+
+> **What:** Prompt engineering is the practice of crafting, testing, versioning, and iterating on the text instructions given to an LLM to shape its behaviour — including system prompts, few-shot examples, output format instructions, and safety constraints.
+
+> **Why:** Prompts are the primary interface between business requirements and LLM behaviour. A well-engineered prompt makes the bot accurate, consistent, and safe. A poorly engineered one produces hallucinations, wrong tone, off-topic responses, and security vulnerabilities. In production, prompts must be treated as code — versioned, tested, and deployed with the same rigour.
+
+> **How (Production Prompt Engineering Cycle):**
+> 1. Define the task and success criteria precisely
+> 2. Write an initial prompt; test against 20+ diverse cases manually
+> 3. Run automated eval suite; identify failure modes
+> 4. Iterate: add constraints, examples, edge-case handling
+> 5. Version in Git; run regression tests on every change
+> 6. Deploy as canary; monitor metrics vs baseline
+> 7. Collect production failures → add to eval suite → repeat
+
+> **Benefits:**
+> - Faster to iterate than fine-tuning — change a prompt in minutes, not days
+> - Directly encodes business rules and brand voice
+> - Version-controlled prompts enable instant rollback if a change hurts metrics
+
+> **Key Terms:**
+> - **System Prompt:** The persistent instructions given to the LLM that define its persona, scope, and rules
+> - **Temperature:** Controls randomness — 0 is deterministic, 1.0 is highly random
+> - **Few-Shot Examples:** Worked examples included in the prompt to guide the model's output format
+> - **Chain-of-Thought (CoT):** Instructing the model to reason step-by-step before giving a final answer
+> - **Prompt Injection:** Attack where user input contains instructions that override the system prompt
+> - **SSML:** XML markup for controlling TTS prosody — critical when prompt outputs go to voice
+> - **Prompt Versioning:** Storing prompts as versioned files in Git with automated regression tests
+> - **Zero-Shot:** Giving the model a task with no examples; relies entirely on the instruction
+> - **Few-Shot:** Including 3–10 worked examples in the prompt to demonstrate the desired behaviour
 
 ---
 
@@ -2237,6 +2716,8 @@ For IAG's customer service bot, use temperature 0 for all tool calls and factual
 
 ---
 
+### Q66–Q70: Prompting Variants, RLHF, A/B Testing
+
 ### Q66. What is the difference between zero-shot, one-shot, and few-shot in LLM prompting?
 
 **Answer:**
@@ -2308,7 +2789,7 @@ At IAG, a hallucinated claim amount (€2,000 vs. €20,000) could trigger a leg
 
 ---
 
-### Q68. What is Retrieval-Augmented Generation (RAG) vs fine-tuning, and when should you use each?
+### Q68. What is RAG vs fine-tuning, and when should you use each?
 
 **Answer:**
 
@@ -2397,13 +2878,12 @@ Always hash by session/user ID, not randomly per request. A user randomly seeing
 
 ---
 
-### Additional 30 Questions — Quick Reference
+## Additional 30 Questions — Quick Reference
 
 ---
 
 ### Q71. What is the difference between NLU and NLP?
 
-**Answer:**  
 **NLP (Natural Language Processing)** is the broad field covering all computational processing of human language: parsing, classification, translation, generation, etc.  
 **NLU (Natural Language Understanding)** is a subset focused specifically on extracting meaning and intent from natural language. In conversational AI, NLU covers intent classification, entity recognition, and semantic parsing — the "understanding" half. NLG (Natural Language Generation) covers the response generation half.
 
@@ -2411,14 +2891,12 @@ Always hash by session/user ID, not randomly per request. A user randomly seeing
 
 ### Q72. What is transfer learning and how does it accelerate building conversational AI?
 
-**Answer:**  
 Transfer learning uses a model pre-trained on massive data (BERT, RoBERTa, GPT) as a starting point, then fine-tunes on a smaller domain-specific dataset. Instead of training from scratch (terabytes of data + months of compute), you fine-tune with 100–10,000 examples in hours. For intent classification at IAG, you'd start from a French BERT model (CamemBERT) and fine-tune on 500 labeled insurance utterances, achieving > 90% accuracy.
 
 ---
 
 ### Q73. What is quantization in the context of LLM inference?
 
-**Answer:**  
 Quantization reduces the numerical precision of model weights (float32 → float16 → int8 → int4) to reduce memory footprint and increase inference speed with minimal accuracy loss.  
 - **FP16:** 2x memory reduction vs FP32, near-identical accuracy
 - **INT8:** 4x reduction, ~1% accuracy loss, 2x faster
@@ -2429,7 +2907,6 @@ For IAG, running Mistral 7B in INT4 (GGUF format via llama.cpp) on a single A10 
 
 ### Q74. What is the difference between synchronous and asynchronous LLM calls?
 
-**Answer:**  
 **Synchronous:** The calling thread blocks until the LLM returns. Simple but wastes CPU while waiting.  
 **Asynchronous (async/await):** The calling coroutine yields control while waiting, allowing other requests to be processed. Essential for high-concurrency voice bots where hundreds of simultaneous LLM calls are in flight. Python `asyncio` + `openai` async client is the standard pattern.
 
@@ -2437,35 +2914,30 @@ For IAG, running Mistral 7B in INT4 (GGUF format via llama.cpp) on a single A10 
 
 ### Q75. What is an embedding and how is it used in a chatbot?
 
-**Answer:**  
 An embedding is a fixed-length dense vector (e.g., 1536 floats) that represents the semantic meaning of a text. Similar texts have vectors close together in this high-dimensional space. In chatbots: (1) RAG — embed user queries and knowledge base chunks, find closest chunks via cosine similarity; (2) Semantic caching — find cached responses for similar queries; (3) Intent classification — classify by proximity to intent example embeddings.
 
 ---
 
 ### Q76. What is a vector database and why is it used for RAG?
 
-**Answer:**  
 A vector database stores embeddings and supports fast approximate nearest-neighbor (ANN) search — finding the K most similar vectors to a query vector in milliseconds. Unlike SQL `WHERE` clauses (exact match), vector DBs find semantically similar content even without exact keyword overlap. Options: Pinecone (managed), Qdrant (self-hosted), Weaviate, Chroma (local dev), pgvector (Postgres extension). For IAG, pgvector on an existing Postgres instance is the simplest start; Qdrant for production scale.
 
 ---
 
-### Q77. What is Langchain and when would you use it vs building custom pipelines?
+### Q77. What is LangChain and when would you use it vs building custom pipelines?
 
-**Answer:**  
 LangChain is a framework for building LLM applications with abstractions for chains, agents, memory, and tools. Use it for: rapid prototyping, common patterns (RAG, ReAct agents), and when you want pre-built integrations (100+ vector DBs, LLMs, tools). Avoid it for: highly custom pipelines, production systems where you need full control and minimal abstraction overhead, or when the LangChain abstraction doesn't fit your architecture. Many teams start with LangChain and gradually replace components with custom code as they scale.
 
 ---
 
 ### Q78. What is the "lost in the middle" problem with LLM context windows?
 
-**Answer:**  
 Research shows LLMs have degraded performance at retrieving information from the middle of long context windows — they're best at start and end positions. For RAG: don't just dump 20 retrieved chunks into context; rerank by relevance and place the most relevant chunk last (closest to the question). For conversation history: recent turns at the end are more influential than older turns at the start. Place the summarized history at the beginning and the last 3-5 turns at the end.
 
 ---
 
 ### Q79. How do you handle PII (Personal Identifiable Information) in a voice AI system?
 
-**Answer:**  
 PII in voice AI includes: customer name, policy number, date of birth, address, bank details, voice recording.  
 **Practices:** (1) Mask PII in logs — replace with tokens before logging; (2) Encrypt at rest (AES-256) and in transit (TLS 1.3); (3) Don't send PII to third-party LLM APIs — use locally hosted models for PII-heavy processing; (4) Audio retention policy — delete after 30 days unless legally required; (5) GDPR right to erasure — implement deletion pipeline; (6) Pseudonymization in analytics — replace name with user_id hash.
 
@@ -2473,7 +2945,6 @@ PII in voice AI includes: customer name, policy number, date of birth, address, 
 
 ### Q80. What is the difference between a chatbot, a virtual assistant, and an AI agent?
 
-**Answer:**  
 **Chatbot:** Reactive, typically handles single-turn or simple multi-turn conversations. Answers questions, follows scripts.  
 **Virtual Assistant:** Proactive, multi-modal, executes tasks across multiple systems. Siri, Alexa, Google Assistant.  
 **AI Agent:** Autonomous, goal-directed, uses tools and multi-step reasoning to complete complex tasks without human guidance at each step. Plans, acts, observes, and adapts. LLM + tools + memory + planning = AI agent.  
@@ -2481,208 +2952,47 @@ IAG's system is likely positioned as a virtual assistant (handles voice + text, 
 
 ---
 
-### Q81. What is the BLIP architecture and how does multimodality affect chatbots?
+### Q81–Q100: Additional Quick Reference
 
-**Answer:**  
-BLIP (Bootstrapping Language-Image Pre-training) is a multi-modal model that understands both text and images. For insurance chatbots, multi-modality enables: (1) Customer photos a damaged vehicle/property → bot analyzes and initiates claim; (2) Scan policy document → extract and interpret terms; (3) Scan invoice/receipt → validate claim amount. Current multi-modal LLMs (GPT-4V, Claude Vision, Gemini) handle this well via image + text prompts.
+**Q81. BLIP and multimodal chatbots:** BLIP enables image + text understanding. For insurance: customer photos damaged property → bot initiates claim; scan policy document → extract terms; scan receipt → validate claim. Current multimodal LLMs (GPT-4V, Claude Vision, Gemini) handle this via image + text prompts.
 
----
+**Q82. Human escalation flow:** Triggers: explicit request, high frustration sentiment, 3x failed task, high-stakes action. Flow: acknowledge empathetically → collect reason → provide wait time → transfer with context packet (summary, intent, slots) → offer callback if no agents.
 
-### Q82. How do you implement a human escalation flow in a voice bot?
+**Q83. Knowledge distillation:** Trains a small "student" model to mimic a large "teacher" model's probability outputs. Result: 2–5x smaller model retaining 90–95% of teacher performance. Distill a fine-tuned GPT-4-quality intent classifier into DistilBERT for 10x faster inference.
 
-**Answer:**  
-Escalation triggers: (1) User explicitly requests ("I want to speak to a human"); (2) NLU detects high frustration (sentiment analysis); (3) Task completion failing after 3 attempts; (4) High-stakes action requiring human approval; (5) STT confidence consistently low.  
-Escalation flow: (1) Acknowledge request empathetically; (2) Collect reason for escalation; (3) Provide estimated wait time; (4) Transfer call with context packet (conversation summary, intent, slots) to human agent CRM; (5) If no agents available, offer callback.
+**Q84. Extractive vs abstractive QA:** Extractive: returns verbatim span from source document — no generation, hallucination-free, fast (BERT on SQuAD). Abstractive: generates a new answer synthesising from sources — flexible, can combine multiple sources, can hallucinate (GPT-4 + RAG). Use extractive for exact policy terms; abstractive for explaining them in customer-friendly language.
 
----
+**Q85. GPU memory optimization:** (1) Quantize models (INT8/INT4); (2) Load STT/TTS on CPU, LLM on GPU; (3) FP16 inference halves VRAM; (4) Set `--max-model-len` in vLLM to cap per-request KV cache; (5) Separate GPU node clusters for STT/LLM/TTS in production.
 
-### Q83. What is Knowledge Distillation and how does it apply to deploying smaller AI models?
+**Q86. Semantic vs keyword search:** Keyword (BM25): fast, exact word matching, fails on synonyms. Semantic (vector): handles paraphrases and synonyms, requires embedding. Hybrid (BM25 + vector + RRF reranking): best recall in production RAG systems.
 
-**Answer:**  
-Knowledge distillation trains a small "student" model to mimic a large "teacher" model's output distribution, not just ground truth labels. The student learns the teacher's "soft" probability outputs (which carry more information than hard labels). Result: a 2–5x smaller model that retains 90–95% of the teacher's performance. For IAG: distill a fine-tuned GPT-4-quality intent classifier into a DistilBERT model for 10x faster, cheaper inference at similar accuracy.
+**Q87. Multilingual TTS:** Azure Neural has 140+ language voices with excellent French (Henri, Denise). XTTS v2 handles 17 languages including French. Key: test with French insurance vocabulary — proper nouns (product names, contract numbers) are common failure points.
 
----
+**Q88. WebRTC DTLS-SRTP:** DTLS provides key exchange over UDP; SRTP encrypts the audio stream. Standard WebRTC security — all audio encrypted end-to-end. For IAG compliance: verify DTLS-SRTP is enabled; record audio only at server side; GDPR-compliant storage.
 
-### Q84. What is the difference between extractive and abstractive question answering?
+**Q89. Push-to-talk vs full-duplex:** Push-to-talk: user presses button to speak — simple but unnatural. Half-duplex VAD: automatic turn detection — more natural. Full-duplex: simultaneous speech enabled — requires AEC — most natural feel and expected by French phone users.
 
-**Answer:**  
-**Extractive QA:** Identifies and returns a span of text directly from the source document as the answer. No generation — answer is a verbatim excerpt. Fast, highly accurate, hallucination-free. Models: BERT fine-tuned on SQuAD.  
-**Abstractive QA:** Generates a new answer synthesizing information from the source. Can combine information from multiple sources, rephrase, and explain. More flexible but requires generation model and can hallucinate. Models: GPT-4, T5, BART with RAG.  
-For IAG: use extractive for exact policy term retrieval; abstractive (with RAG grounding) for explaining terms in customer-friendly language.
+**Q90. Model drift detection:** Monitor CSAT and accuracy weekly with statistical alerts. Sample 2% of calls for human review weekly. Track OOV (out-of-vocabulary) rate in transcripts — increase signals data drift. A/B test current model vs freshly retrained quarterly.
 
----
+**Q91. LangGraph for workflows:** LangGraph builds stateful, multi-step workflows as directed graphs with cycles (loops), explicit state, human-in-the-loop breakpoints, and parallel branches. For IAG: claim filing as a graph — authenticate → collect details → verify coverage → estimate value → conditional branch (auto-approve / assign adjuster) → notify.
 
-### Q85. How do you optimize GPU memory usage for LLM/STT/TTS serving on the same machine?
+**Q92. Load balancer types:** L4 (TCP/UDP): routes by IP/port, very fast, for raw media streams. L7 (HTTP/WebSocket): routes by content, for API routing. For IAG: AWS ALB for WebSocket APIs + NLB for UDP media streams. Sticky sessions for WebSocket (IP-hash or cookie).
 
-**Answer:**  
-(1) **Model scheduling:** Don't load all models simultaneously. Load STT/TTS on CPU (they're smaller); LLM on GPU. Or multiplex GPU with dynamic loading.  
-(2) **Quantization:** Reduce model size (INT8/INT4) to fit multiple models on one GPU.  
-(3) **Mixed precision:** FP16 inference instead of FP32 halves VRAM.  
-(4) **Batch processing:** Group requests to improve GPU utilization.  
-(5) **Separate GPU nodes:** Production: STT cluster, LLM cluster, TTS cluster on separate GPU nodes with autoscaling.  
-(6) **KV cache limits:** Set `--max-model-len` in vLLM to limit per-request KV cache allocation.
+**Q93. Batching for GPU throughput:** GPUs are massively parallel — single requests use a fraction of capacity. Batching groups requests for near-linear throughput scaling. Static batching: fixed wait for N requests (simple, adds latency). Continuous batching (vLLM): requests join batches dynamically — optimal for real-time serving.
 
----
+**Q94. WebSocket heartbeat:** Periodic ping/pong to keep connections alive and detect failures. Critical for long voice sessions (30+ min claim filing) — firewalls close idle connections after 30–300s. Implement: ping every 30s, expect pong within 5s, reconnect on failure with Redis state recovery.
 
-### Q86. What is semantic search and how does it differ from keyword search?
+**Q95. Concurrent state modifications:** Solutions: Redis optimistic locking (`WATCH/MULTI/EXEC`), distributed Redlock, event sourcing via Kafka (immutable events = no concurrent modification), or single-region session affinity. For IAG: single-region affinity + Redis Cluster replication within region.
 
-**Answer:**  
-**Keyword search (BM25/TF-IDF):** Matches query words to document words. Fast, explainable, handles rare words well. Fails on synonyms ("cancel" ≠ "terminate").  
-**Semantic search (vector search):** Embeds query and documents; finds similar meaning regardless of exact words. Handles synonyms, paraphrases, cross-lingual. Slower, requires embedding computation.  
-**Hybrid search (best practice):** BM25 + vector search combined with RRF (Reciprocal Rank Fusion) reranking. Better recall than either alone. Used in production RAG systems (Elasticsearch + pgvector, Qdrant hybrid mode).
+**Q96. Intent vs entity:** Intent = what the user wants to do (cancel_policy). Entity/slot = specific data needed to do it (policy_id: "AIA-2847", effective_date: "March 1"). Together they give a complete structured action request with no ambiguity.
 
----
+**Q97. Telephony integration:** PSTN connection via CPaaS (Twilio, Vonage) or direct SIP trunk. Twilio flow: customer calls → Twilio answers → streams audio via WebSocket to your server → you stream TTS back → Twilio plays to customer. Cost at scale: ~€0.013/min + compute. At 100K min/month: ~€1,300 + compute.
 
-### Q87. How do you handle multilingual TTS for a bot serving multiple language markets?
+**Q98. Conversation analytics at scale:** Pipeline: conversation events → Kafka → Spark Streaming (real-time) + Kafka → S3 (batch) → dbt → Snowflake/BigQuery → Metabase/Tableau. Key analytics: intent distribution, deflection rate, CSAT by intent, bot performance heatmap, conversation path drop-off analysis.
 
-**Answer:**  
-Options: (1) Language-specific neural voices (Azure has 140+ language voices, each optimized); (2) XTTS v2 — multi-lingual model that handles 17 languages including French; (3) OpenAI TTS — multi-lingual but limited voice options.  
-For French (IAG's primary market): Azure Neural French voices (Henri, Denise) offer excellent quality with proper French prosody. Key requirement: SSML support for French-specific features (liaisons, accents, formal/informal register). Test extensively with French insurance vocabulary — synthetic voices often struggle with proper nouns.
+**Q99. Deterministic vs probabilistic testing:** Deterministic (temp=0): exact output matching. Probabilistic (temp>0): statistical testing (100 samples, assert X% pass), property-based testing (response always contains policy number), LLM-as-judge scoring. High-stakes paths (claim filing): deterministic. Conversational paths: probabilistic with property testing.
 
----
-
-### Q88. What is WebRTC's DTLS-SRTP and why does it matter for voice security?
-
-**Answer:**  
-**DTLS (Datagram TLS):** Key exchange protocol over UDP, providing encryption for real-time audio streams (unlike TCP-based TLS).  
-**SRTP (Secure RTP):** Encrypts the actual audio data in RTP packets.  
-DTLS-SRTP is the standard WebRTC security mechanism — all audio in a WebRTC session is encrypted end-to-end. For IAG compliance: (1) Verify WebRTC implementation uses DTLS-SRTP; (2) Record at server side only (client audio decrypted at server, re-encrypted for storage); (3) GDPR-compliant storage of call recordings.
-
----
-
-### Q89. What is the difference between push-to-talk and full-duplex voice bots?
-
-**Answer:**  
-**Push-to-talk:** User presses a button to speak; bot waits; user releases; bot responds. Simple, no barge-in needed. Feels unnatural for phone conversations.  
-**Half-duplex (VAD-based):** VAD detects speech start/end automatically. More natural but no simultaneous speech.  
-**Full-duplex:** Both sides can speak simultaneously. Requires acoustic echo cancellation (AEC) to prevent the bot's TTS output from being picked up by the microphone. Enables barge-in. Most natural feel. Harder to implement — requires WebRTC AEC pipeline.  
-For IAG's phone bot: full-duplex with barge-in support is expected by French customers accustomed to natural conversation flow.
-
----
-
-### Q90. What is model drift and how do you detect it in production AI systems?
-
-**Answer:**  
-**Model drift** is the degradation of model performance over time as the real-world data distribution shifts away from training data.  
-**Types:** (1) Data drift — input distribution changes (customers use new vocabulary, new products launched); (2) Concept drift — relationship between input and target changes (what counts as "good resolution" changes).  
-**Detection:** (1) Monitor accuracy/CSAT metrics weekly — statistical alerts on degradation; (2) Sample and human-review 2% of conversations weekly; (3) Track vocabulary distribution in incoming transcripts — OOV (out-of-vocabulary) rate increase signals data drift; (4) A/B test current model against a freshly retrained version quarterly.  
-**Response:** Collect new labeled examples from drifted region, retrain/fine-tune, A/B test, deploy.
-
----
-
-### Q91. What is LangGraph and how does it enable complex conversational AI workflows?
-
-**Answer:**  
-LangGraph is a framework (by LangChain) for building stateful, multi-step AI workflows as directed graphs. Nodes are processing steps (LLM call, tool call, conditional logic); edges define transitions between steps.  
-**Benefits over LangChain chains:** (1) Cycles (loops in workflow — retry logic, multi-attempt reasoning); (2) Explicit state management; (3) Human-in-the-loop (pause at any node for human approval); (4) Parallel branches.  
-**IAG use case:** Claim filing workflow as a graph: authenticate → collect incident details → verify coverage → estimate value → conditional branch (auto-approve if < €500 / assign adjuster if > €500) → notify customer.
-
----
-
-### Q92. What is the role of a load balancer in a voice AI system and what type do you use?
-
-**Answer:**  
-Load balancers distribute incoming connections across multiple server instances.  
-**Layer 4 (TCP/UDP LB):** Routes by IP/port. Very fast, no content inspection. Good for raw audio streams (UDP-based media).  
-**Layer 7 (HTTP/WebSocket LB):** Routes by content (URL, headers, WebSocket protocol). Needed for routing to correct STT/TTS cluster based on language, routing authenticated users to their session.  
-**Sticky sessions:** Voice sessions must route to the same backend pod (WebSocket connection). Use IP-hash or cookie-based stickiness — OR use stateless backends with Redis for state.  
-For IAG: AWS ALB (Application Load Balancer) for WebSocket APIs + NLB (Network Load Balancer) for UDP media streams.
-
----
-
-### Q93. How does batching improve GPU throughput for AI inference?
-
-**Answer:**  
-GPUs are massively parallel processors — they compute thousands of operations simultaneously. A single request uses only a fraction of GPU capacity. Batching groups multiple requests and processes them together, achieving near-linear throughput scaling up to batch saturation.  
-**Static batching:** Wait for N requests, then process. Adds latency for early requests.  
-**Dynamic/continuous batching (vLLM):** Continuously add new requests to in-flight batches. Requests join at next available slot.  
-For voice: STT/TTS can batch offline post-call processing efficiently. Real-time inference (< 100ms budget) limits effective batch size to ~4–8 requests simultaneously.
-
----
-
-### Q94. What is WebSocket heartbeat and why is it critical for long voice sessions?
-
-**Answer:**  
-A heartbeat is a periodic ping/pong message exchanged between client and server to keep the WebSocket connection alive and detect disconnections.  
-**Why critical:** (1) Firewalls/proxies close "idle" TCP connections after 30–300 seconds; (2) Silent network failures not detected without heartbeats; (3) Long voice sessions (30+ minute claim filing) will timeout without heartbeats.  
-**Implementation:** Send ping every 30 seconds; expect pong within 5 seconds. On missed pong, close and reconnect. On reconnect, resume from saved session state in Redis.
-
----
-
-### Q95. How do you handle concurrent modifications to conversation state in a multi-region deployment?
-
-**Answer:**  
-When a user's conversation state might be updated from multiple servers (e.g., multi-region with failover), concurrent modification risks:  
-**Solutions:** (1) **Redis optimistic locking** — `WATCH` + `MULTI/EXEC` transaction; abort if another write occurred; (2) **Distributed lock** (Redlock algorithm) — acquire lock before reading/writing state; (3) **Event sourcing** — state is derived from immutable event stream (Kafka); no concurrent modification possible; (4) **Single-region session affinity** — pin each session to one region; only failover on region failure.  
-For IAG: Single-region session affinity + Redis Cluster replication for HA within region. Cross-region failover: reconnect with full context resent.
-
----
-
-### Q96. What is the difference between intent and entity in NLU?
-
-**Answer:**  
-**Intent** is the action or goal behind a user's message — what they want to do.  
-Example: "I want to cancel my policy" → Intent: `cancel_policy`  
-**Entity** (slot) is specific information within the message needed to fulfill the intent.  
-Example: "I want to cancel policy AIA-2847 effective March 1" → Intent: `cancel_policy`, Entities: `{policy_id: "AIA-2847", effective_date: "March 1"}`  
-Together, intent + entities give you a complete structured understanding of the user's request that can drive system actions without further ambiguity.
-
----
-
-### Q97. What is telephony integration and how do voice bots connect to phone systems?
-
-**Answer:**  
-**PSTN (Public Switched Telephone Network):** Traditional phone network.  
-**Integration options:** (1) **CPaaS (Communications Platform as a Service):** Twilio, Vonage, SignalWire — expose phone numbers, handle PSTN/SIP, provide WebSocket audio streaming. Simplest integration; (2) **SIP (Session Initiation Protocol):** Direct SIP trunk integration. More complex, lower cost at scale; (3) **WebRTC gateway:** Bridge WebRTC (web) to SIP/PSTN.  
-**Twilio flow:** Customer calls number → Twilio answers → Twilio WebSocket streams audio to your server → Your server runs pipeline → Streams TTS audio back to Twilio → Twilio plays to customer.  
-Cost at scale: Twilio ~€0.013/minute + your compute. At 100K minutes/month: €1,300 + compute.
-
----
-
-### Q98. How do you implement conversation analytics at scale?
-
-**Answer:**  
-**Data pipeline:**  
-1. Every conversation event (message, intent, score) → Kafka topic  
-2. Kafka → Spark Streaming (real-time) + Kafka → S3 (batch)  
-3. S3 Parquet files → dbt models → analytics warehouse (Snowflake, BigQuery, Redshift)  
-4. BI tool (Metabase, Tableau, Looker) for dashboards  
-**Key analytics:**  
-- Intent distribution (most common user needs)  
-- Deflection rate (% handled without human)  
-- CSAT by intent, channel, time of day  
-- Bot performance heatmap (which intents have lowest accuracy)  
-- Conversation path analysis (common flows, drop-off points)  
-Actionable: Feed low-performing intents back to training pipeline automatically.
-
----
-
-### Q99. What is the difference between deterministic and probabilistic AI systems, and how does it affect testing?
-
-**Answer:**  
-**Deterministic:** Same input always produces same output (rule-based systems, temperature=0 LLM). Easy to unit test.  
-**Probabilistic:** Same input may produce different outputs (LLM at temperature>0, STT with audio variation). Testing requires:  
-(1) **Statistical testing** — run 100 samples, assert X% pass; (2) **Property-based testing** — test invariants ("response always mentions policy number when queried") not exact output; (3) **LLM-as-judge evaluation** — semantic quality scoring; (4) **Regression delta testing** — compare new model's output distribution to old model's.  
-For IAG: All high-stakes paths (claim filing, escalation) should be deterministic (temperature=0). Conversational paths can be probabilistic with property testing.
-
----
-
-### Q100. What emerging technologies will most impact conversational AI in the next 2 years?
-
-**Answer:**  
-
-1. **End-to-end voice models (speech LLMs):** Models like GPT-4o's native voice mode, Moshi (Kyutai), and Llama-Omni process audio directly without separate STT/TTS stages. Eliminates cascading errors, enables true real-time spoken conversation with natural prosody. Will disrupt the classic STT→LLM→TTS pipeline.
-
-2. **Real-time multi-modal LLMs:** Models that process audio + video + text simultaneously. Customer holds phone to damaged car → bot sees video and initiates claim in real-time.
-
-3. **On-device AI:** Qualcomm/Apple NPUs running 7B+ parameter models on-device. No cloud needed. Sub-50ms STT+LLM+TTS on a smartphone. Total privacy, zero latency.
-
-4. **Improved voice cloning + emotion synthesis:** Neural TTS with real-time emotional adaptation. Bot voice becomes warmer when customer is frustrated, more energetic when delivering good news.
-
-5. **Agentic AI systems:** Fully autonomous agents handling complete workflows (claim start to finish without human) with reliability approaching 99%. Current agents fail on complex tasks; next 2 years will see dramatic reliability improvements.
-
-**Real-World Insight:**  
-IAG should build their architecture to be modular (the cascading design) precisely because the STT/LLM/TTS components will be disrupted. A modular design lets you swap in GPT-4o native voice when it's production-ready without rebuilding the entire system.
+**Q100. Emerging technologies (next 2 years):** (1) End-to-end speech LLMs (GPT-4o voice mode, Moshi) — eliminates cascading errors; (2) Real-time multimodal LLMs — audio + video + text simultaneously; (3) On-device AI — 7B+ models on smartphone NPUs, sub-50ms, full privacy; (4) Emotional TTS — real-time voice adaptation to customer emotional state; (5) Reliable agentic systems — end-to-end claim handling without human. IAG should build modular architecture precisely because these components will disrupt the current cascade.
 
 ---
 
@@ -2700,6 +3010,47 @@ IAG should build their architecture to be modular (the cascading design) precise
 | **Deployment** | vLLM, K8s, canary, blue-green, rate limiting | Stateless + Redis state |
 | **Monitoring** | OpenTelemetry, Prometheus, TTFT, CSAT drift | Golden signals: error, latency, throughput |
 | **Prompting** | Temperature, CoT, few-shot, RAG, injection | System prompt as code (version it) |
+
+---
+
+## 🔷 MASTER QUICK-REFERENCE: All Concept Overviews at a Glance
+
+| Concept | What (1 line) | Why (1 line) | Key Interview Signal |
+|---|---|---|---|
+| **Chatbot Architecture** | Layered pipeline: input → NLU → DM → LLM → output | Structure determines reliability, cost, and maintainability at scale | Describe hybrid: rule-based routing + LLM generation |
+| **Intent Classification** | Categorising user messages into predefined action labels | Enables routing decisions without sending everything to an expensive LLM | Know embedding-based classifiers for sub-5ms latency |
+| **Slot Filling** | Extracting structured data (entities) from natural language | Translates free text into the specific fields needed to complete a task | Multi-turn: ask for missing slots; validate against business rules |
+| **Dialogue Manager** | Component that decides the bot's next action given conversation state | Without DM, bot cannot track multi-step tasks or handle interruptions | FSM for predictability; LLM-as-DM for flexibility |
+| **RAG** | Retrieve relevant documents before calling LLM; include as context | LLM doesn't know IAG-specific policies; retrieval grounds it in real data | Always mention chunking + embedding + reranking pipeline |
+| **VAD** | Detecting speech vs silence in real-time audio | Determines when user stops speaking and STT should run | Silero VAD ~1ms; tune silence duration for language/culture |
+| **STT / Whisper** | Converting speech audio to text | Voice bots cannot understand speech without transcription | faster-whisper on GPU; domain fine-tuning for French insurance |
+| **WER** | (Substitutions + Deletions + Insertions) / Total reference words | Primary accuracy metric for STT; directly impacts all downstream stages | Domain WER matters more than generic benchmark WER |
+| **Streaming STT** | Returning partial transcripts as audio arrives | Enables end-of-utterance detection and real-time captions | CTC models (wav2vec2) stream; attention (Whisper) needs full utterance |
+| **Speaker Diarization** | Segmenting audio by who is speaking | Required for call centre QA — must separate agent from customer turns | pyannote.audio + whisperx for production pipeline |
+| **TTS / XTTS** | Converting text to natural spoken audio | Without quality TTS, even correct responses sound robotic and untrustworthy | MOS > 4.0 target; SSML for prosody control; streaming for latency |
+| **Streaming TTS** | Synthesising audio sentence-by-sentence as LLM tokens arrive | Reduces TTFA from 3s to 400ms — the most impactful latency optimisation | Split LLM stream on sentence boundaries (`.!?`) |
+| **Prosody / SSML** | Rhythm, stress, intonation — what makes speech natural | Wrong prosody on "claim denied" without empathy destroys customer trust | SSML `<break>`, `<emphasis>`, `<prosody>` tags; test by listening |
+| **Cascading Pipeline** | Multi-stage pipeline: VAD → STT → NLU → DM → LLM → TTS | Complex AI tasks require specialised stages; cascade makes each independently optimisable | Error rates compound — 5 stages × 5% error = 77% overall accuracy |
+| **Error Propagation** | Errors from upstream stages compound through downstream stages | A 10% STT WER means 1 in 10 words is wrong before NLU even starts | Confidence passing, N-best hypotheses, confirmation prompts |
+| **Shortcut / Fast Path** | Skipping pipeline stages when an early confident decision can be made | 60–70% of calls are common queries — shortcuts save massive LLM cost | Log all shortcuts; cache FAQ answers in Redis |
+| **vLLM** | High-performance LLM inference server with PagedAttention + continuous batching | 3–24x more throughput than HuggingFace Transformers from same GPU | OpenAI-compatible API; use for Mistral/Llama self-hosting |
+| **Speculative Decoding** | Small draft model proposes tokens; large model verifies in parallel | 2–3x generation speedup on predictable outputs (greetings, structured responses) | Best for short, repetitive voice bot responses |
+| **Caching (LLM/TTS/Semantic)** | Storing and reusing previous results for identical or similar inputs | Deflects 20–40% of LLM calls; reduces TTFT for repeated system prompts | Redis for exact/semantic cache; KV cache for prompt prefix reuse |
+| **Streaming vs Batch** | Streaming: real-time per event; batch: scheduled bulk processing | Live calls need streaming; analytics can use cheaper batch compute | Kafka connects hot (streaming) and cold (batch) paths |
+| **Function Calling / Tool Use** | LLM outputs a structured API call instead of plain text | Grounds LLM in real data; prevents hallucination of policy/claim details | Always validate tool arguments independently of LLM output |
+| **API Gateway** | Reverse proxy handling auth, rate limiting, routing, and observability | Single control point for all AI service traffic; critical for cost and security | LiteLLM for multi-provider LLM routing; Kong/Nginx for general gateway |
+| **Memory (4 types)** | In-context, external (long-term), episodic, semantic/knowledge | LLMs are stateless — all context must be explicitly provided each turn | Sliding window + summarisation + Redis + vector DB for retrieval |
+| **Context Overflow** | When conversation history exceeds the LLM's context window | Silently drops important early context (policy numbers, claim types) | Fact extraction + sliding window is minimum viable |
+| **LLM-as-Judge** | Using GPT-4 to score outputs of the application LLM | Human labelling is slow; BLEU/ROUGE fail on open-ended responses | Score: accuracy, empathy, conciseness, professionalism |
+| **CSAT / Task Completion** | Customer satisfaction rating and % of goals successfully achieved | The only metrics that truly matter in production — business outcomes | Correlate with all other technical metrics to find root causes |
+| **Canary Deployment** | Routing 5% of traffic to new version; monitoring before full rollout | Prompt changes silently degrade quality — catch before affecting all users | Hash by user_id for consistent experience per user |
+| **Distributed Tracing** | Tracking a request through every service stage with timing | Makes "bot was slow at 3pm" diagnosable in seconds, not hours | OpenTelemetry → Jaeger; sample 10% normally, 100% of errors |
+| **Audit Trail** | Immutable timestamped record of every LLM call, tool call, and response | GDPR + ACPR require records for dispute resolution and compliance | Append-only storage; encrypt PII; 5–10 year retention for insurance |
+| **Prompt Injection** | Malicious user input that overrides the system prompt | Could cause bot to approve fraudulent claims or leak system instructions | Sanitise inputs; XML delimiters; validate all tool arguments independently |
+| **Temperature** | Controls LLM randomness — 0 = deterministic, 1.0 = creative | Factual responses need temp=0; conversational responses need temp=0.3 | Never use temp > 0.5 for tool calls or factual claims |
+| **Chain-of-Thought** | LLM reasons step-by-step before giving a final answer | Complex eligibility rules require sequential reasoning to avoid errors | Log CoT for explainability even if not shown to customer |
+| **Hallucination** | LLM generating confident but factually wrong information | In insurance, a wrong claim amount triggers a legal dispute | RAG + temperature 0 + output verification for all monetary values |
+| **RLHF / DPO** | Training technique using human preference ratings to improve model behaviour | Optimises for correctness and user satisfaction, not just next-token prediction | Collect 1K rated turns → DPO fine-tuning → measure CSAT uplift |
 
 ---
 

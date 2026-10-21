@@ -182,7 +182,7 @@ response = client.chat.completions.create(
     frequency_penalty=0.3,   # Reduce repetition
     presence_penalty=0.1,    # Encourage new topics 
     stop=["\n\n\n"],         # Stop at triple newline
-    seed=42                   # Reproducible
+    seed=42                   # Reproducible -> is used for models that support it (not all do)
 )
 ```
 

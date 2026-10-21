@@ -202,6 +202,30 @@ Output: [0, 0, 9, 0, 0]
 
 ### ✍️ Solution (Optimal — O(n) time, O(1) extra space)
 ```java
+
+
+ public static void main(String[] args) {
+        int[] arr = {1, 2, 3, 4};
+        int [] result = new int[arr.length];
+
+        for(int i=0; i< arr.length ; i++){
+            int product =1;
+
+            for(int j=0; j<arr.length ;j++){
+                if(i != j){
+                    product = product * arr[j];
+                }
+            }
+            
+            result[i] = product;
+        }
+        System.out.println(Arrays.toString(result));
+    }
+
+
+--------------------------------------------------------
+
+
 class Solution {
     public int[] productExceptSelf(int[] nums) {
         int n = nums.length;
