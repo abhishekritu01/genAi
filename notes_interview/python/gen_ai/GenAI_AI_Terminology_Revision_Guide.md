@@ -149,6 +149,65 @@ Almost every example uses **one imaginary product**:
 - **Definition:** During generation, the model **stores attention keys/values** of previous tokens so it doesn't recompute them for each new token.
 - **Example:** Generating a 500-token reply: without the cache, token 500 recomputes attention over all 499 earlier tokens. With it, only the new token's work is done. **This is what makes decoding fast.**
 
+#### Simple idea (think of it like notes)
+- An LLM writes **one word (token) at a time**.
+- To pick the next word, it has to **look back at all the earlier words**.
+- **Without cache:** every time, it re-reads and re-processes all earlier words from scratch → slow.
+- **With cache:** it **saves its notes** about each earlier word once, and just reuses them → fast.
+- Those saved "notes" are called **Keys and Values (K, V)** → hence **KV cache**.
+
+**Real-life analogy:** Reading a book and someone asks "what happens next?" after every page.
+- No cache = re-read the whole book from page 1 every time.
+- KV cache = keep a summary notebook, read only the new page, check your notebook.
+
+#### Diagram 1 — ❌ Without KV cache (redo everything every step)
+Sentence being written: **"The cat sat on"**
+```mermaid
+flowchart LR
+    S1["Step 1<br/>work on:<br/>The"] --> S2["Step 2<br/>work on:<br/>The, cat"]
+    S2 --> S3["Step 3<br/>work on:<br/>The, cat, sat"]
+    S3 --> S4["Step 4<br/>work on:<br/>The, cat, sat, on"]
+    style S1 fill:#fdd,stroke:#c00,color:#000
+    style S2 fill:#fdd,stroke:#c00,color:#000
+    style S3 fill:#fdd,stroke:#c00,color:#000
+    style S4 fill:#fdd,stroke:#c00,color:#000
+```
+👉 Old words (The, cat, sat) are processed **again and again** → slow.
+
+#### Diagram 2 — ✅ With KV cache (only the new word, reuse saved notes)
+```mermaid
+flowchart LR
+    S1["Step 1<br/>work on:<br/>The"] --> S2["Step 2<br/>work on:<br/>cat"]
+    S2 --> S3["Step 3<br/>work on:<br/>sat"]
+    S3 --> S4["Step 4<br/>work on:<br/>on"]
+    S1 -- save --> C[("📒 KV Cache<br/>(saved notes)")]
+    S2 -- save --> C
+    S3 -- save --> C
+    C -- reuse --> S4
+    style S1 fill:#dfd,stroke:#080,color:#000
+    style S2 fill:#dfd,stroke:#080,color:#000
+    style S3 fill:#dfd,stroke:#080,color:#000
+    style S4 fill:#dfd,stroke:#080,color:#000
+    style C fill:#ffd,stroke:#aa0,color:#000
+```
+👉 Each step works on **only 1 new word**; old words come from the cache → fast.
+
+#### Same thing as a table
+| Step | Without cache (words processed) | With cache (words processed) |
+|------|---------------------------------|------------------------------|
+| 1    | The → **1**                     | The → **1**                  |
+| 2    | The, cat → **2**                | cat → **1**                  |
+| 3    | The, cat, sat → **3**           | sat → **1**                  |
+| 4    | The, cat, sat, on → **4**       | on → **1**                   |
+| Total| **10**                          | **4**                        |
+
+#### Remember these 3 points
+1. **Benefit:** faster text generation.
+2. **Cost:** the saved notes take **GPU memory** — longer chats = more memory.
+3. **Prompt caching** (Anthropic/OpenAI APIs) = same idea **across requests**: a long, repeated system prompt is cached → **cheaper and faster**. Tip: put fixed content first, changing content last.
+
+**One-liner:** *KV cache = save work from earlier tokens so the model doesn't redo it for every new token.*
+
 ### ✅ Section 1 Cheat Sheet
 - **LLM** = transformer that predicts the **next token**; plausible ≠ true.
 - **Token** = unit of **cost + latency + limits** (~¾ word).

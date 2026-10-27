@@ -1,43 +1,67 @@
 # RingCentral: Agentic Systems Engineer: Complete Interview Prep Guide
 
-> Built from the JD you provided. Interview: **Friday**. Read Part 0 first, then follow the plan in Part 2.
+> Built from the JD (see 1.0). Read Part 0 first, then follow the plan in Part 2.
 > Rule: everything personal (projects, metrics, years) is a **fill-in-the-blank template**. Only use what is true for you.
+> Companion file: [agentic systems engineer interview02.md](agentic%20systems%20engineer%20interview02.md) has 220 short Q&As for drilling. **This file = depth; interview02 = rapid-fire practice.**
+
+---
+
+## ⚡ Fast path (interview day / last-minute revision)
+| Need | Go to |
+|---|---|
+| 1-page summary of everything | **Part 27** (revision sheet) |
+| Most likely questions | **Part 26** (Top 35) |
+| What NOT to say | **Part 28** |
+| Questions to ask them | **Part 29** |
+| Final checklist | **Part 31** |
 
 ---
 
 ## Table of Contents
 
+**A. Orientation**
 0. How to use this guide
 1. JD analysis (what they want, what they'll test)
-2. Study plan (Wed night → Fri morning)
-3. Topic 1: LLM fundamentals and providers
-4. Topic 2: Prompt engineering and structured outputs
-5. Topic 3: Tool calling, function calling and the agent loop
-6. Topic 4: RAG (end to end)
-7. Topic 5: Embeddings and vector databases
-8. Topic 6: LangChain and LangGraph
-9. Topic 7: Multi-agent workflows
-10. Topic 8: Context windows, memory and conversational state
-11. Topic 9: Enterprise integrations, REST, connectors, MCP
-12. Topic 10: Evaluation (tool-call accuracy, hallucination, LLM-as-judge, regression)
-13. Topic 11: Observability and tracing
-14. Topic 12: Security, guardrails, access control, audit logging
-15. Topic 13: NLP/NLU, classification, automation
-16. Topic 14: SQL and NoSQL in AI pipelines
-17. Topic 15: Full-stack delivery (LLM backend to frontend)
-18. Topic 16: Coding questions (Python/Node)
-19. Topic 17: Cloud, Docker, CI/CD (nice-to-have)
-20. Topic 18: Cost, latency and reliability
-21. System design questions (with answer outlines)
-22. Production incidents and debugging playbook
-23. Project deep-dive framework
-24. HR and behavioral answers (templates)
-25. Top 30 most likely questions
-26. One-page revision sheet
-27. Mistakes and red flags
-28. Questions to ask the interviewer
-29. Mock interview tracker and final mock
-30. Last 24 hours checklist
+2. Study plan (Day -2 → interview day)
+
+**B. Core LLM and agent engineering**
+3. LLM fundamentals and providers (OpenAI, Anthropic, agent SDKs)
+4. Prompt engineering and structured outputs
+5. Tool calling, function calling and the agent loop
+6. RAG (end to end, including agentic RAG)
+7. Embeddings and vector databases
+8. LangChain and LangGraph (v1)
+9. Multi-agent workflows
+10. Context engineering, memory and conversational state
+
+**C. Enterprise, quality and safety**
+11. Enterprise integrations: REST, connectors, MCP, A2A
+12. Evaluation (tool-call accuracy, hallucination, LLM-as-judge, regression, simulated users)
+13. Observability and tracing
+14. Security, guardrails, access control, audit logging (OWASP LLM Top 10)
+
+**D. Domain and engineering breadth**
+15. NLP/NLU, classification, automation
+16. Voice and real-time agents (RingCentral domain)
+17. SQL and NoSQL in AI pipelines
+18. Full-stack delivery (LLM backend to frontend)
+19. Coding questions (Python/Node)
+20. Cloud, Docker, CI/CD (nice-to-have)
+21. Cost, latency and reliability
+
+**E. Design, debugging and your story**
+22. System design questions (with answer outlines)
+23. Production incidents and debugging playbook
+24. Project deep-dive framework
+25. HR and behavioral answers (templates)
+
+**F. Quick revision and interview day**
+26. Top 35 most likely questions
+27. One-page revision sheet
+28. Mistakes and red flags
+29. Questions to ask the interviewer
+30. Mock interview tracker and final mock
+31. Last 24 hours checklist
 
 ---
 
@@ -64,6 +88,11 @@
 ---
 
 # 1. JD Analysis
+
+## 1.0 The JD (paste the original text here)
+> _Paste the exact JD here so every mapping below can be checked against the real wording._
+>
+> Key lines as understood: Python/Node · OpenAI/Anthropic APIs + **LangChain/LangGraph** (highlighted) · agentic workflows calling APIs, vector stores, DBs per defined design patterns · RAG · NLP/NLU, prompts, embeddings · integrations via REST, connectors, MCP-style tool registries · test cases, eval harnesses, observability · guardrails, access control, audit logging · SQL/NoSQL · full-stack delivery · operate within existing architecture and flag gaps · 3+ yrs SWE, 1-2 yrs LLM.
 
 ## 1.1 Role in one paragraph
 RingCentral (cloud communications: voice, video, messaging, contact center) wants an **implementer** who builds reliable agentic apps, RAG pipelines and tool integrations **inside an established platform architecture**, connecting AI agents to enterprise systems.
@@ -115,20 +144,20 @@ RingCentral (cloud communications: voice, video, messaging, contact center) want
 
 | Slot | Do | Output |
 |---|---|---|
-| **Wed night (now)** | Skim Parts 3-5; answer Mock Q1 aloud | Tool-calling story ready |
-| **Thu 9-12** | Parts 6-8 (RAG, embeddings, LangChain/LangGraph) | Can draw RAG + LangGraph from memory |
-| **Thu 12-1** | Break | |
-| **Thu 1-4** | Parts 9-12 (integrations, evals, observability, security) | Can explain eval pipeline + prompt injection defenses |
-| **Thu 4-6** | Parts 13-18 (skim), do coding exercises | Write tool loop + eval harness on a blank page |
-| **Thu 6-8** | Part 23-24: write your project stories + HR answers | Written, spoken aloud 2× |
-| **Thu 9-10** | Full mock (Part 29) | Weak-area list |
-| **Fri morning** | Parts 25-28 only. No new topics. | Calm, confident |
+| **Day -2, evening** | Parts 3-5 (LLM basics, prompts, tool calling); answer 5.6 Q1 aloud | Tool-calling story ready |
+| **Day -1, 9-12** | Parts 6-8 (RAG, embeddings, LangChain/LangGraph) | Can draw RAG + LangGraph from memory |
+| **Day -1, 12-1** | Break | |
+| **Day -1, 1-4** | Parts 9-14 (multi-agent, context, integrations, evals, observability, security) | Can explain eval pipeline + prompt injection defenses |
+| **Day -1, 4-6** | Parts 15-21 (skim; read 16 properly), do Part 19 coding exercises | Write tool loop + eval harness on a blank page |
+| **Day -1, 6-8** | Parts 24-25: write your project stories + HR answers | Written, spoken aloud 2× |
+| **Day -1, 9-10** | Full mock (Part 30) | Weak-area list |
+| **Interview morning** | Parts 26-29 only. No new topics. | Calm, confident |
 
-**If you only have 4 hours total:** Parts 5, 6, 8, 10, 12, 23, 24, 25.
+**If you only have 4 hours total:** Parts 5, 6, 8, 12, 14, 24, 25, 26.
 
 ---
 
-# 3. Topic 1: LLM Fundamentals and Providers 🔴
+# 3. LLM Fundamentals and Providers 🔴
 
 ## 3.1 Simple explanation
 An LLM predicts the next token given previous tokens. Everything (answers, tool calls, JSON) is generated token by token. It doesn't "know" facts reliably; it learned patterns. So we ground it with retrieval, tools and validation.
@@ -151,14 +180,35 @@ An LLM predicts the next token given previous tokens. Everything (answers, tool 
 
 | Aspect | OpenAI | Anthropic (Claude) |
 |---|---|---|
-| Tool call format | `tool_calls` on assistant message; reply with `role: "tool"` + `tool_call_id` | `tool_use` content blocks (stop_reason `tool_use`); reply with `tool_result` block in a *user* message |
-| System prompt | `system`/`developer` message | Separate top-level `system` parameter |
-| Structured output | JSON schema / structured outputs mode | Tool-use with JSON schema is the common route for strict structure |
-| Multiple tool calls | Parallel tool calls supported | Multiple `tool_use` blocks possible in one turn |
+| Main APIs | **Responses API** (newer, stateful option, built-in tools) and Chat Completions (classic) | Messages API |
+| Tool call format | Chat Completions: `tool_calls` on assistant message; reply with `role: "tool"` + `tool_call_id`. Responses API: `function_call` item; reply with `function_call_output` item + `call_id` | `tool_use` content blocks (stop_reason `tool_use`); reply with `tool_result` blocks in the next *user* message |
+| System prompt | `system`/`developer` message (Responses: `instructions`) | Separate top-level `system` parameter |
+| Structured output | Native structured outputs (JSON schema, `strict: true`) | Native structured outputs (JSON schema) and strict tool use; tool-schema trick still works |
+| Tool choice | `tool_choice`: auto / required / specific function / none | `tool_choice`: auto / any / specific tool / none |
+| Multiple tool calls | Parallel tool calls supported (can disable) | Multiple `tool_use` blocks in one turn; **all `tool_result`s go back in ONE user message** |
+| Prompt caching | Automatic for long repeated prefixes | Explicit `cache_control` breakpoints on stable blocks (system, tools, docs) |
+| Reasoning | Reasoning models with effort setting | Extended thinking with a token budget / effort |
 
 > Don't memorize exact parameter names; know the **concepts**. Say: "The loop is the same; the message envelope differs, and I wrap providers behind an adapter so the orchestration layer is provider-agnostic."
 
-## 3.4 Questions and sample answers
+## 3.4 Agent SDKs and frameworks landscape (awareness level)
+| Option | What it is | When it fits |
+|---|---|---|
+| **LangGraph** (Python + JS) | Low-level graph orchestration, state, checkpoints, HITL | Custom, durable, inspectable workflows (the JD's stack) |
+| **LangChain v1 `create_agent`** | High-level agent built on LangGraph, with middleware | Standard tool-calling agents quickly |
+| **OpenAI Agents SDK** | Agents, handoffs, guardrails, tracing | OpenAI-centric multi-agent apps |
+| **Claude Agent SDK** | The agent harness behind Claude Code (tools, context management, subagents, MCP) | Long-running autonomous agents on Claude |
+| **Plain SDK + your own loop** | ~50 lines (Part 5.3) | Simple agents; full control |
+
+> Interview line: "Frameworks change fast. I know what each one abstracts (the loop, state, tool dispatch, tracing), so I can work in whichever one the platform has standardized on."
+
+## 3.5 Enterprise provider concerns
+- **Data handling**: zero-data-retention options, no training on API data, data residency/region, enterprise agreements (DPA).
+- **Model lifecycle**: pin model versions/snapshots; track deprecation dates; run the eval suite before migrating.
+- **Access paths**: direct API vs cloud-hosted (Azure OpenAI, AWS Bedrock, Google Vertex AI), which matters for networking, IAM, and compliance.
+- **Quotas**: per-org rate limits (RPM/TPM); plan concurrency and fallbacks around them.
+
+## 3.6 Questions and sample answers
 
 **Q1. How do you choose between models for a task?**
 > I start from the task's requirements: accuracy, latency, cost, context size, tool-calling reliability. I build a small eval set from real examples, run candidates against it, and compare quality per dollar and p95 latency. Often a small, cheap model handles classification/routing, and a stronger model handles complex reasoning or final synthesis. I keep the model behind a config so I can swap it without code changes.
@@ -173,13 +223,21 @@ An LLM predicts the next token given previous tokens. Everything (answers, tool 
 > Retries with exponential backoff and jitter on 429/5xx, timeouts, circuit breaker, and a fallback model/provider behind the same interface. Queue non-interactive work. Monitor error rate and latency per provider.
 
 **Q5. What is prompt caching and when does it help?**
-> It reuses the processed prefix of a prompt across calls. It helps when you have a long stable prefix, such as a system prompt, tool schemas, and few-shot examples, followed by a short variable suffix. Put stable content first and variable content last so the cache can hit.
+> It reuses the processed prefix of a prompt across calls. It helps when you have a long stable prefix, such as a system prompt, tool schemas, and few-shot examples, followed by a short variable suffix. Put stable content first and variable content last so the cache can hit. OpenAI caches automatically; on Anthropic I mark cache breakpoints explicitly. Anything that changes the prefix (a timestamp in the system prompt, reordered tools) breaks the cache.
+
+**Q6. A provider is deprecating the model you use. How do you migrate?**
+> Run the full eval suite on the new model, compare per category against the pinned baseline, adjust prompts where it regresses, then roll out behind a flag with canary monitoring. Model IDs live in config, so the switch itself is not a code change.
+
+**Q7. What do reasoning/"thinking" models change for agents?**
+> Better multi-step planning and tool selection, at the cost of latency and tokens. I use them for hard planning or synthesis steps and keep fast models for routing and extraction. The thinking budget is another knob to tune against the eval set.
 
 **Follow-ups to expect:** "What's the difference between a base model and an instruction-tuned model?", "What is fine-tuning vs RAG?" (see 6.6).
 
+> **Base vs instruction-tuned (one line):** a base model only continues text; an instruction-tuned model was further trained (SFT + preference tuning such as RLHF/DPO) to follow instructions, chat, and call tools. Applications use instruction-tuned models.
+
 ---
 
-# 4. Topic 2: Prompt Engineering and Structured Outputs 🔴
+# 4. Prompt Engineering and Structured Outputs 🔴
 
 ## 4.1 Simple explanation
 A prompt is the program. Good prompts state role, task, constraints, output format and examples. Structured outputs force the model to return machine-readable data (JSON) so downstream code doesn't break.
@@ -241,14 +299,14 @@ def parse_with_retry(call_llm, prompt, max_retries=2):
 > Few-shot first: cheap, fast to iterate, no training pipeline. Fine-tune when I have lots of labeled data, need consistent style/format, lower latency/cost via a smaller model, or prompting hits a ceiling. Fine-tuning doesn't reliably inject new factual knowledge; RAG is better for changing facts.
 
 **Q4. How do you prevent a prompt from being hijacked by user input?**
-> Keep instructions in the system prompt, wrap untrusted content in clear delimiters, tell the model that content inside is data, not instructions, and, most importantly, don't rely on the prompt alone. Enforce permissions in code at the tool layer. (Details in Topic 12.)
+> Keep instructions in the system prompt, wrap untrusted content in clear delimiters, tell the model that content inside is data, not instructions, and, most importantly, don't rely on the prompt alone. Enforce permissions in code at the tool layer. (Details in Part 14.)
 
 **Q5. How do you manage prompts across a team?**
 > Store them as versioned files or a prompt registry, with templates and variables, linked to eval results. Changes go through review and the regression suite like any code change.
 
 ---
 
-# 5. Topic 3: Tool Calling, Function Calling and the Agent Loop 🔴🔴 (highest probability)
+# 5. Tool Calling, Function Calling and the Agent Loop 🔴🔴 (highest probability)
 
 ## 5.1 Simple explanation
 The model can't act. It can only say "call function X with arguments Y." **Your code** runs it and returns the result. Repeat until the model gives a final answer. That loop is an agent.
@@ -308,6 +366,14 @@ def run_tool(user, name, raw_args):
         log.exception("tool failed")
         return {"error": "Tool failed", "retryable": False}
 
+def compact(result, max_chars=4000):
+    """Shrink BEFORE serializing; slicing a JSON string mid-way gives the model invalid JSON."""
+    s = json.dumps(result, default=str)
+    if len(s) <= max_chars:
+        return s
+    return json.dumps({"truncated": True, "preview": s[:max_chars],
+                       "hint": "Result too large; narrow the query or use filters."})
+
 def agent(user, question, llm, max_steps=8):
     messages = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": question}]
     for step in range(max_steps):
@@ -315,16 +381,19 @@ def agent(user, question, llm, max_steps=8):
         if not resp.tool_calls:
             return resp.text
         messages.append(resp.as_message())
-        for call in resp.tool_calls:
-            result = run_tool(user, call.name, call.args)
-            messages.append(tool_result_message(call.id, json.dumps(result)[:4000]))   # cap size
+        results = [tool_result(call.id, compact(run_tool(user, call.name, call.args)))
+                   for call in resp.tool_calls]
+        messages.extend(tool_result_messages(results))   # provider adapter decides the envelope
     return "I couldn't complete this; escalating to a human."
 ```
+
+> **Provider envelope gotcha:** OpenAI Chat Completions wants one `role: "tool"` message per call. Anthropic wants **all** `tool_result` blocks for a turn inside **one** user message, and every `tool_use` id must get a result, or the next request fails. Hide this in the adapter (`tool_result_messages`).
 
 ## 5.4 Design principles
 - **Tool descriptions are prompts**: clear name, purpose, *when to use / when not to*, parameter docs, examples.
 - **Few, well-separated tools** beat many overlapping ones (reduces wrong selection).
-- **Strict schemas** (enums, required fields, formats).
+- **Strict schemas** (enums, required fields, formats; `additionalProperties: false`; provider strict mode where available).
+- **`tool_choice`**: force a specific tool for extraction steps, `none` for the final answer step, `auto` otherwise.
 - **Return errors the model can act on** ("customer_id must be 8 digits") rather than stack traces.
 - **Idempotency** for writes (idempotency key or check-then-create) so retries don't duplicate.
 - **Read vs write separation**: reads auto-allowed; writes may need confirmation / human approval.
@@ -367,16 +436,34 @@ def agent(user, question, llm, max_steps=8):
 > Three layers: unit tests for each tool (without the LLM); deterministic tests for schema validation and permission logic; and LLM-in-the-loop evals with a labeled dataset (input → expected tool + args) measuring tool-selection accuracy, argument accuracy, task completion, and number of steps. Run these in CI as regression.
 
 **Q6. What's the difference between function calling and MCP?**
-> Function calling is the model-level mechanism for emitting structured calls against tools you pass in. MCP (Model Context Protocol) is an open protocol standardizing *how tools/resources/prompts are exposed to AI apps*: a client-server architecture so any MCP-compatible client can discover and use tools from any MCP server without bespoke integration code. Function calling is the "how the model asks"; MCP is the "how tools are packaged and discovered."
+> Function calling is the model-level mechanism for emitting structured calls against tools you pass in. MCP (Model Context Protocol) is an open protocol standardizing *how tools/resources/prompts are exposed to AI apps*: a client-server architecture so any MCP-compatible client can discover and use tools from any MCP server without bespoke integration code. Function calling is the "how the model asks"; MCP is the "how tools are packaged and discovered." (Full MCP and A2A coverage in 11.3-11.4.)
 
 **Q7. How would you let an agent do something risky (e.g., refund)?**
 > Human-in-the-loop: the agent proposes the action with its reasoning, a human approves, then a separate privileged executor performs it. Limit amounts via policy in code, log everything, and make it idempotent and reversible where possible.
+
+**Q8. What makes a good tool description? Show one.**
+> Name is a verb + object; description says what it does, when to use it, when NOT to use it, and what it returns; every parameter has a type, format and example.
+```json
+{
+  "name": "search_tickets",
+  "description": "Search existing support tickets for ONE customer. Use before creating a ticket to avoid duplicates. Do NOT use for knowledge-base articles (use search_kb). Returns at most 10 tickets: id, subject, status, updated_at.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "customer_id": {"type": "string", "description": "8-digit customer id, e.g. '10234567'"},
+      "status": {"type": "string", "enum": ["open", "pending", "closed", "any"]}
+    },
+    "required": ["customer_id"],
+    "additionalProperties": false
+  }
+}
+```
 
 **Follow-ups:** "How do you version tool schemas?" (versioned names, backward-compatible additions, contract tests); "How do you handle 50+ tools?" (router/retrieval over tool descriptions, scoped tool sets per workflow).
 
 ---
 
-# 6. Topic 4: RAG (End to End) 🔴🔴
+# 6. RAG (End to End) 🔴🔴
 
 ## 6.1 Simple explanation
 LLMs don't know your private/current data. RAG = **retrieve** relevant chunks from your data, **put them in the prompt**, and **generate** an answer grounded in them, with citations.
@@ -412,7 +499,7 @@ QUERY (online)
 - **Top-k**: tune (e.g., retrieve 20-50, rerank to 3-8).
 - **MMR**: diversify results to avoid redundant chunks.
 
-**Reranking**: a cross-encoder rescored on (query, chunk) pairs, usually big precision gain.
+**Reranking**: a cross-encoder rescores each (query, chunk) pair jointly; usually a big precision gain for some latency.
 
 **Query transformation**: rewrite with chat history (resolve "it/that"), multi-query expansion, HyDE (generate hypothetical answer to embed), decomposition for multi-hop questions.
 
@@ -444,7 +531,29 @@ Build a **golden dataset** of (question, expected source chunks, reference answe
 | Small corpus, one-off analysis | **Long context** (but cost, latency and "lost in the middle" apply) |
 | Often | **Combine** |
 
-## 6.7 Questions and sample answers
+## 6.7 Agentic RAG and advanced retrieval 🟠🔴 (the "agentic" in the job title)
+Classic RAG retrieves **once**, always. Agentic RAG lets the agent decide **whether, where, and how many times** to retrieve.
+
+| Technique | Idea | When it helps |
+|---|---|---|
+| **Retrieval as a tool** | `search_kb(query, filters)` is just another tool; the agent writes the query and can call it repeatedly | Multi-hop, mixed questions (KB + CRM + SQL) |
+| **Routing across sources** | Agent/classifier picks KB vs tickets vs SQL vs web | Many heterogeneous sources |
+| **Corrective RAG (CRAG)** | Grade retrieved chunks; if weak, rewrite query / try another source / abstain | Noisy corpora |
+| **Self-RAG / self-check** | Model checks if the answer is supported, retrieves again if not | High-accuracy answers |
+| **Iterative / multi-hop** | Retrieve → reason → retrieve again with new info | "Which plan does the customer who filed ticket X have?" |
+| **Contextual retrieval** | Before embedding, prepend a short LLM-written context to each chunk ("This chunk is from the 2025 billing policy, section refunds…") | Chunks that lose meaning out of context |
+| **GraphRAG / knowledge graph** | Extract entities and relations; traverse graph + summarize communities | Global/"connect-the-dots" questions over a corpus |
+| **Late-interaction (ColBERT)** | Token-level matching instead of one vector per chunk | Precision on long or jargon-heavy text |
+
+**LangGraph shape of corrective RAG:**
+```
+START → retrieve → grade_docs ─(relevant)→ generate → check_grounded ─(ok)→ END
+                        └─(weak)→ rewrite_query → retrieve (max 2 loops) → else abstain/escalate
+```
+
+**Trade-offs:** more LLM calls = more latency and cost, and more ways to loop. Cap retrieval iterations, log each retrieval step in the trace, and evaluate against plain RAG on the same golden set; keep the extra complexity only if it measurably wins.
+
+## 6.8 Questions and sample answers
 
 **Q1. Explain RAG and how you'd build it for enterprise docs.**
 > Ingest documents, parse and chunk them with structure and metadata, embed and store in a vector DB alongside a keyword index. At query time, rewrite the query using conversation history, run hybrid retrieval with permission filters, rerank, then prompt the LLM to answer only from the retrieved context with citations. I evaluate retrieval and generation separately with a golden dataset and monitor in production.
@@ -476,9 +585,15 @@ Build a **golden dataset** of (question, expected source chunks, reference answe
 **Q10. How do you cite sources?**
 > Pass chunk IDs/titles with the context, require the model to reference them, validate that cited IDs exist and actually support the claim, and render links in the UI.
 
+**Q11. What is agentic RAG and when is it worth it over classic RAG?**
+> Retrieval becomes a tool the agent controls: it decides whether to retrieve, which source, and whether to retrieve again after grading the results. It wins on multi-hop questions, mixed sources (docs plus CRM plus SQL), and noisy corpora where a grade-and-retry step helps. It costs more latency and tokens and adds loop risk, so I cap iterations and only adopt it when the eval set shows a real gain over hybrid-plus-rerank.
+
+**Q12. Retrieved chunks lose meaning on their own ("it increased by 3%"). Fix?**
+> Contextual retrieval: prepend a short document-level context to each chunk before embedding and BM25 indexing. Also parent-child retrieval, so the model sees the surrounding section, and better structure-aware chunking.
+
 ---
 
-# 7. Topic 5: Embeddings and Vector Databases 🔴/🟠
+# 7. Embeddings and Vector Databases 🔴/🟠
 
 ## 7.1 Simple explanation
 An **embedding** turns text into a vector so that *similar meaning ≈ nearby vectors*. A **vector DB** stores vectors and finds nearest neighbors fast.
@@ -515,7 +630,7 @@ An **embedding** turns text into a vector so that *similar meaning ≈ nearby ve
 
 ---
 
-# 8. Topic 6: LangChain and LangGraph 🔴🔴 (highlighted in the JD)
+# 8. LangChain and LangGraph 🔴🔴 (highlighted in the JD)
 
 ## 8.1 Simple explanation
 - **LangChain**: building blocks: model wrappers, prompt templates, output parsers, retrievers, tools, and composition (LCEL, the `|` pipe style).
@@ -553,7 +668,7 @@ from typing import Annotated, TypedDict
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
-from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.memory import InMemorySaver   # older name: MemorySaver
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]     # reducer: append messages
@@ -570,7 +685,7 @@ graph.add_edge(START, "agent")
 graph.add_conditional_edges("agent", tools_condition)   # → "tools" or END
 graph.add_edge("tools", "agent")                        # loop back
 
-app = graph.compile(checkpointer=MemorySaver())          # use Postgres/SQLite checkpointer in prod
+app = graph.compile(checkpointer=InMemorySaver())        # use Postgres/SQLite checkpointer in prod
 app.invoke({"messages": [("user", "Find order 123")]},
            config={"configurable": {"thread_id": "user-42"}, "recursion_limit": 15})
 ```
@@ -585,7 +700,86 @@ result = chain.invoke({"text": "..."})
 ```
 Also know: `retriever`, `RunnableParallel`, `RunnableLambda`, callbacks/tracing, `bind_tools`, `with_structured_output`.
 
-## 8.6 Questions and sample answers
+## 8.6 LangChain v1 / LangGraph 1.x: what's new and must-know 🔴
+> Exact parameter names shift between minor versions. Know the **concept** and the rough API shape.
+
+**A. `create_agent` + middleware (LangChain v1)**: the standard tool-calling agent, built on LangGraph. It replaces `langgraph.prebuilt.create_react_agent` and older `AgentExecutor`.
+```python
+from langchain.agents import create_agent
+from langchain.agents.middleware import HumanInTheLoopMiddleware, SummarizationMiddleware
+
+agent = create_agent(
+    model="provider:model-name",                 # or a chat model object
+    tools=[search_tickets, create_ticket],
+    system_prompt="You are a support assistant...",
+    middleware=[
+        SummarizationMiddleware(model="provider:small-model"),          # compress old history
+        HumanInTheLoopMiddleware(interrupt_on={"create_ticket": True}), # pause before writes
+    ],
+    checkpointer=checkpointer,
+)
+```
+**Middleware** = hooks around the loop (before/after model call, around tool calls): summarization, HITL, PII redaction, model fallback, call limits, dynamic prompts/tool selection. It's where cross-cutting concerns go instead of hacking the loop.
+
+**B. `interrupt()` + `Command(resume=...)`**: human-in-the-loop inside any node.
+```python
+from langgraph.types import interrupt, Command
+
+def approve_write(state):
+    decision = interrupt({"action": "create_ticket", "args": state["proposed_args"]})  # pauses, state saved
+    if decision["approved"]:
+        return {"approved_args": decision.get("edited_args", state["proposed_args"])}
+    return Command(goto="explain_rejection")
+
+# later, after the human clicks Approve in the UI (same thread_id):
+app.invoke(Command(resume={"approved": True}), config={"configurable": {"thread_id": "t-1"}})
+```
+Note: when resumed, the node **re-runs from its start**, so code before `interrupt()` must be idempotent (no side effects before the interrupt).
+
+**C. `Command(goto=..., update=...)`**: a node can update state **and** choose the next node in one return (handy for handoffs between agents).
+
+**D. `Send` API**: dynamic fan-out (map-reduce): run one node per item in parallel, then merge via a reducer.
+```python
+from langgraph.types import Send
+
+def fan_out(state):
+    return [Send("summarize_chunk", {"chunk": c}) for c in state["chunks"]]
+graph.add_conditional_edges("split", fan_out)     # results merged by reducer on "summaries"
+```
+
+**E. Streaming modes**: `stream_mode="values"` (full state each step), `"updates"` (only deltas per node), `"messages"` (LLM tokens + metadata), `"custom"` (your own progress events from inside nodes), `"debug"`. You can pass several at once.
+```python
+async for mode, chunk in app.astream(inputs, config, stream_mode=["updates", "messages"]):
+    ...  # forward to the frontend via SSE
+```
+
+**F. Checkpointer vs Store (two kinds of memory)**
+| | Checkpointer | Store |
+|---|---|---|
+| Scope | One `thread_id` (one conversation) | Across threads (per user/org namespace) |
+| Holds | Full graph state at every step | Long-term facts/preferences/documents |
+| Use | Resume, HITL, time travel, short-term memory | "Remember the user prefers email", semantic memory search |
+| API sketch | `compile(checkpointer=PostgresSaver(...))` | `compile(store=...)`; `store.put((user_id, "memories"), key, value)`, `store.search(ns, query=...)` |
+
+**G. Durable execution**: with a checkpointer, a crashed/restarted run resumes from the last completed step. Wrap side effects in their own nodes (or `@task`) so they aren't repeated on replay. Durability mode can trade safety vs speed (persist each step synchronously vs async vs only at exit).
+
+**H. Time travel**: `get_state_history(config)` lists past checkpoints; you can re-run from one (optionally with edited state) to debug or branch.
+
+**I. Functional API**: `@entrypoint` / `@task` decorators give checkpointing and interrupts without drawing a graph, for code that reads better as plain functions.
+
+**J. LangGraph.js / LangChain.js**: same concepts in TypeScript (the JD lists Node). State is defined with `Annotation.Root` / Zod; the API mirrors Python.
+
+**K. Deployment and tooling**: LangSmith for tracing/evals/prompt versions; LangGraph Platform/Server for hosting graphs with built-in persistence, task queues, and streaming APIs; LangGraph Studio to visualize and debug graphs.
+
+## 8.7 Common LangGraph pitfalls
+- In-memory checkpointer in production → state lost on restart.
+- Missing reducer on a list field → parallel branches overwrite each other (`InvalidUpdateError`).
+- Side effects before `interrupt()` → executed twice on resume.
+- No recursion limit / step counter → runaway loops (`GraphRecursionError`).
+- Huge state (raw docs, big tool outputs) → slow checkpoints and context bloat; store references instead.
+- Reusing `thread_id` across users → cross-user leakage. Derive it from user + session.
+
+## 8.8 Questions and sample answers
 
 **Q1. LangChain vs LangGraph: when do you use which?**
 > LangChain for simple linear pipelines and components such as prompts, parsers, retrievers, and model wrappers. LangGraph when I need loops, branching, durable state, human approval, or multi-agent coordination, i.e., anything where control flow matters and I need to resume or inspect state.
@@ -594,7 +788,7 @@ Also know: `retriever`, `RunnableParallel`, `RunnableLambda`, callbacks/tracing,
 > State is a typed schema; each node returns partial updates, merged by reducers (e.g., `add_messages` appends). With a checkpointer keyed by `thread_id`, every step is saved, so conversations resume across requests, failures can be resumed, and I can replay or debug past states. In production I'd use a durable store like Postgres, not in-memory.
 
 **Q3. How do you implement human-in-the-loop approval?**
-> Add an interrupt before the sensitive node, for example before executing a write tool. The graph pauses and persists state; the UI shows the proposed action; on approval (or edited args) I resume with the same `thread_id`. This also gives an audit trail of who approved what.
+> Call `interrupt()` in an approval node before the write tool runs (or use the HITL middleware with `create_agent`). The graph pauses and persists state; the UI shows the proposed action; on approval, rejection, or edited args I resume with `Command(resume=...)` on the same `thread_id`. I keep side effects out of the code before the interrupt, since the node re-runs on resume. This also gives an audit trail of who approved what.
 
 **Q4. How do you prevent infinite loops in a graph?**
 > Recursion limit, explicit step counter in state, repeated-call detection, and conditional edges that route to a fallback/escalation node when the budget is exhausted.
@@ -606,14 +800,26 @@ Also know: `retriever`, `RunnableParallel`, `RunnableLambda`, callbacks/tracing,
 > Abstraction overhead, rapid API changes, harder debugging if you don't understand what's underneath, sometimes unnecessary for simple cases. Mitigation: keep thin wrappers around framework-specific code, pin versions, write tests, use tracing, and understand the raw API calls. *(And per the JD: we work within the established framework; I'd follow the platform's patterns.)*
 
 **Q7. How do you stream results from a LangGraph app?**
-> Use the streaming modes to emit token deltas and step updates, forward via SSE/WebSocket to the frontend, show tool-in-progress states, and handle cancellations.
+> `astream` with `stream_mode=["messages", "updates", "custom"]`: tokens for the chat bubble, node updates for "searching tickets…" indicators, and custom events for progress. I forward them via SSE (or WebSocket) to the frontend and cancel the run when the client disconnects.
 
 **Q8. How would you test a LangGraph workflow?**
 > Unit-test nodes with fixed state inputs, mock the LLM/tools for deterministic graph-routing tests, then run LLM-in-the-loop evals for end-to-end behavior, and snapshot-test the routing decisions.
 
+**Q9. Checkpointer vs Store: what's the difference?**
+> The checkpointer saves graph state per thread, so it's short-term, conversation-scoped memory that enables resume, HITL and time travel. The Store is long-term memory shared across threads, namespaced per user or org, for facts and preferences, with optional semantic search. Both should be durable (Postgres) in production and namespaced so users can't read each other's data.
+
+**Q10. How do you run work in parallel in LangGraph?**
+> Static parallelism: multiple edges out of one node, so those nodes run in the same superstep. Dynamic: the `Send` API to fan out one task per item (map-reduce). In both cases the shared state key needs a reducer (like `operator.add`) so parallel updates merge instead of colliding.
+
+**Q11. `create_agent` vs a custom StateGraph?**
+> `create_agent` for a standard tool-calling loop, with middleware for summarization, HITL, and limits; it's fast and well-tested. A custom StateGraph when the flow is a known workflow (classify → retrieve → draft → approve → write), when I need explicit branches, parallel fan-out, or multiple agents with their own state. The agent can also be one node inside a bigger graph.
+
+**Q12. What happens to a running graph if the server crashes?**
+> With a durable checkpointer, state is saved after each step, so the run can be resumed from the last checkpoint on the same `thread_id`. Steps that weren't completed re-run, which is why side-effecting nodes must be idempotent.
+
 ---
 
-# 9. Topic 7: Multi-Agent Workflows 🟠🔴
+# 9. Multi-Agent Workflows 🟠🔴
 
 ## 9.1 Simple explanation
 Instead of one giant prompt/agent with every tool, split work into specialized agents (e.g., researcher, SQL agent, writer, reviewer) coordinated by an orchestrator or a defined workflow.
@@ -639,7 +845,15 @@ Instead of one giant prompt/agent with every tool, split work into specialized a
 - **Failure isolation**: one agent failing shouldn't corrupt global state.
 - **Evaluation**: evaluate each agent and the whole system.
 
-## 9.4 Questions and sample answers
+## 9.4 Implementing it in LangGraph
+- **Supervisor**: supervisor node with an LLM that picks the next worker (structured output `{"next": "billing" | "kb" | "FINISH"}`), conditional edge to worker nodes, workers route back to the supervisor.
+- **Handoffs**: a worker returns `Command(goto="other_agent", update={...})`, or exposes a "transfer_to_X" tool.
+- **Subgraphs**: each specialist is its own compiled graph with private state; the parent maps state in/out.
+- **Agents-as-tools**: the supervisor calls specialists as tools and only sees their summarized result (keeps the supervisor's context small).
+- **Fan-out**: `Send` for parallel workers, then an aggregator node.
+- **Across services/teams/vendors**: A2A protocol (see 11.4) instead of in-process graphs.
+
+## 9.5 Questions and sample answers
 
 **Q1. When would you choose multi-agent over single-agent?**
 > When specialization improves reliability: for example, different tool sets or permissions per domain, prompts becoming too large, or independent subtasks that can run in parallel. Otherwise I stay with one agent, since each extra agent adds latency, cost, and coordination failures.
@@ -656,12 +870,27 @@ Instead of one giant prompt/agent with every tool, split work into specialized a
 **Q5. How do you prevent agents from amplifying each other's errors?**
 > Validate at boundaries (schemas), add verifier/critic steps for high-stakes outputs, limit loops, and keep ground-truth lookups (tools/DB) as the source rather than other agents' claims.
 
+**Q6. Supervisor vs handoff (swarm): which do you pick?**
+> Supervisor when I want central control, a single place for policy, and easy tracing; it costs an extra LLM hop per step. Handoffs when the conversation naturally moves between specialists (sales → support) and latency matters; they're harder to reason about, so I add a global step budget and log every handoff.
+
 ---
 
-# 10. Topic 8: Context Windows, Memory and Conversational State 🔴
+# 10. Context Engineering, Memory and Conversational State 🔴
 
 ## 10.1 Simple explanation
 The model has no memory between calls. **You** send the history every time. Context management = deciding what to include so it fits, stays relevant, and stays cheap.
+
+**Context engineering** (the current term) = designing *everything* that goes into the context window on each call: instructions, tools, retrieved knowledge, memory, tool results, history. Agents fail more often from bad context than from bad models.
+
+## 10.1a The four moves of context engineering
+| Move | Meaning | Examples |
+|---|---|---|
+| **Write** | Save information *outside* the window for later | Scratchpad/notes in state, long-term memory store, files |
+| **Select** | Pull in only what's relevant now | RAG, memory retrieval, tool retrieval (only relevant tool schemas), few-shot selection |
+| **Compress** | Keep the meaning, drop tokens | Summarize old turns, trim tool outputs, compaction when near the limit |
+| **Isolate** | Split context across components | Sub-agents with their own clean context, sandboxed tool state, separate state fields |
+
+**Failure modes to name:** context **poisoning** (a hallucination or injected text gets saved and reused), **distraction** (too much history drowns the task), **confusion** (irrelevant tools/docs mislead), **clash** (contradictory info across turns), **context rot** (quality drops as the window fills, even below the limit).
 
 ## 10.2 Memory types
 | Type | Description | Implementation |
@@ -702,9 +931,15 @@ The model has no memory between calls. **You** send the history every time. Cont
 **Q4. Stateless API servers but a stateful conversation: how?**
 > Keep the service stateless; store conversation/checkpoint state externally (Redis/Postgres) keyed by session/thread ID; any instance can load state, process, and persist it. Handle concurrent requests for the same thread with locking/optimistic concurrency.
 
+**Q5. What is context engineering and how is it different from prompt engineering?**
+> Prompt engineering is writing good instructions. Context engineering is deciding everything the model sees on each call: instructions, tool definitions, retrieved docs, memory, tool results, and history, under a token budget. I think of it as write, select, compress, and isolate: persist notes outside the window, retrieve only what's relevant, summarize or trim, and split work into sub-agents with clean contexts. Most agent failures I'd debug are context failures, not model failures.
+
+**Q6. When trimming history, what can break?**
+> Tool calls and tool results must stay paired. If I drop an assistant message with a tool call but keep its result (or the reverse), the provider rejects the request. So I trim in whole "turns", never in the middle of a tool exchange, and I keep the system prompt and pinned facts.
+
 ---
 
-# 11. Topic 9: Enterprise Integrations: REST, Connectors, MCP 🔴/🟠
+# 11. Enterprise Integrations: REST, Connectors, MCP, A2A 🔴/🟠
 
 ## 11.1 Simple explanation
 Agents are only useful if they can read/write business systems (CRM, ticketing, calendar, billing). Integration work = auth, schemas, reliability, and safety around those APIs.
@@ -728,9 +963,13 @@ Agents are only useful if they can read/write business systems (CRM, ticketing, 
 - **Open standard** for connecting AI apps to tools/data.
 - **Architecture:** host app (with **MCP client**) ↔ **MCP server** exposing:
   - **Tools** (callable functions), **Resources** (readable data), **Prompts** (templates).
-- **Transports:** local (stdio) and remote (HTTP/streamable).
+- **Client features** (server can ask the client): **sampling** (server requests an LLM completion via the client), **elicitation** (server asks the user for input), **roots** (which files/dirs the server may touch).
+- **Transports:** local **stdio** and remote **Streamable HTTP** (replaced the older HTTP+SSE transport).
+- **Protocol:** JSON-RPC 2.0; capability negotiation on `initialize`; `tools/list`, `tools/call`, `resources/read`, list-changed notifications.
+- **Auth (remote servers):** OAuth 2.1-based; the MCP server is a protected resource, tokens are scoped and audience-bound. **Never pass the client's token straight through to downstream APIs** (token passthrough / confused-deputy risk).
+- **Tool annotations:** hints like `readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`. They map onto your registry's risk level, but they are **hints from the server, not security guarantees**; enforce policy on your side.
 - **Benefits:** write the integration once; any MCP client can discover and use it; consistent tool listing/schemas; central registry and governance.
-- **Concerns:** security (untrusted servers, tool poisoning, over-broad permissions), auth for remote servers, tool description injection, version drift, audit.
+- **Concerns:** security (untrusted servers, tool poisoning, over-broad permissions), auth for remote servers, tool description injection, **rug pulls** (a server changes a tool's description after you approved it; pin/hash definitions), version drift, audit.
 - **"MCP-style tool registry"** (the JD wording) = a catalog of tools with schemas, metadata, permissions, and versions that agents discover/select from at runtime.
 
 **Tool registry design:**
@@ -741,7 +980,14 @@ tool: { name, description, input_schema, output_schema, version,
 ```
 Registry provides discovery, scoping per agent/user, governance, and audit.
 
-## 11.4 Questions and sample answers
+## 11.4 A2A (Agent2Agent protocol) and how it relates to MCP
+- **A2A**: an open protocol (started by Google, now under the Linux Foundation) for **agents talking to other agents**, possibly built by different teams/vendors/frameworks.
+- **Agent Card**: JSON metadata (name, skills, endpoint, auth) published by an agent so others can discover it.
+- **Tasks**: the unit of work, with a lifecycle (submitted → working → input-required → completed/failed), messages and artifacts; supports streaming and async push notifications.
+- **MCP vs A2A** (one line): **MCP connects an agent to tools and data; A2A connects an agent to other agents.** A system can use both: an orchestrator talks A2A to a partner's agent, and each agent uses MCP for its own tools.
+- Same governance questions apply: auth between agents, scoping, audit, and treating the other agent's output as untrusted input.
+
+## 11.5 Questions and sample answers
 
 **Q1. How do you integrate an agent with Salesforce/ServiceNow/etc.?**
 > Use OAuth so the agent acts with the user's delegated permissions. Wrap the API into a few intent-level tools such as `search_accounts`, `get_case`, `create_case`, with strict schemas. Handle pagination and server-side filtering to keep results small, respect rate limits with backoff, make creates idempotent, map errors to actionable messages, and log every call. I'd test against a sandbox org and add contract tests so API changes don't silently break the agent.
@@ -764,9 +1010,15 @@ Registry provides discovery, scoping per agent/user, governance, and audit.
 **Q7. An API changes its response schema and the agent breaks. How do you prevent/detect?**
 > Contract tests against recorded schemas, validation of responses at the tool boundary, alerts on validation failures, version pinning where supported, and canary evals in CI.
 
+**Q8. MCP vs A2A?**
+> MCP standardizes how an agent connects to tools, resources and prompts. A2A standardizes how independent agents discover each other (Agent Cards) and hand off tasks with a lifecycle. MCP is agent-to-tool, A2A is agent-to-agent; they're complementary.
+
+**Q9. How do you secure a remote MCP server your agents use?**
+> Vet and allowlist servers, use OAuth with scoped, audience-bound tokens (no token passthrough), pin and review tool definitions so a changed description gets flagged, apply our own policy on top of the server's tool annotations, run each server with least privilege, and log every call through the same audit pipeline as native tools.
+
 ---
 
-# 12. Topic 10: Evaluation 🔴🔴 (explicitly in JD multiple times)
+# 12. Evaluation 🔴🔴 (explicitly in JD multiple times)
 
 ## 12.1 Simple explanation
 You can't improve what you don't measure. LLM outputs are non-deterministic, so "it worked once" is meaningless. An eval is a **dataset + metrics + automated runner** that scores behavior and runs on every change.
@@ -848,7 +1100,8 @@ def evaluate(agent, cases, trials=3):
         "tool_accuracy": sum(r["tool_ok"] for r in rows) / len(rows),
         "arg_accuracy":  sum(r["args_ok"] for r in rows) / len(rows),
         "avg_steps":     statistics.mean(r["steps"] for r in rows),
-        "p95_latency":   sorted(r["latency"] for r in rows)[int(0.95 * len(rows)) - 1],
+        "p95_latency":   statistics.quantiles([r["latency"] for r in rows], n=20)[-1]  # needs >= 2 rows
+                         if len(rows) > 1 else rows[0]["latency"],
     }
     return report, rows
 
@@ -863,7 +1116,18 @@ assert report["tool_accuracy"] >= 0.95, report
 - **Abstention quality**: does it say "I don't know" when it should? (include unanswerable questions in the dataset).
 - **Hallucination rate** = unsupported answers / total answers on the eval set; track over time.
 
-## 12.9 Questions and sample answers
+## 12.9 Simulated-user (multi-turn) evals for agents 🟠
+Single-turn datasets miss real conversations: users give info piece by piece, change their mind, and the agent must ask clarifying questions.
+- **Setup (τ-bench style):** an LLM plays the **user** from a scenario card ("You are customer 1023, you want a refund for order 55, you don't know your order number at first"), the agent under test talks to it, tools run against a **sandbox DB/mock API**.
+- **Grade the end state, not the text:** after the conversation, compare the DB/API state to the expected state (refund issued once, correct amount, ticket created with right fields).
+- **pass^k:** run each scenario k times; report the fraction where it passes **every** time. Agents that pass once but not reliably are not production-ready.
+- **Also check:** policy compliance (did it verify identity before acting?), number of turns, unnecessary tool calls, escalations.
+- **Caveat:** the simulated user is itself an LLM, so it can drift; keep scenario cards specific and spot-check transcripts.
+
+## 12.10 Eval tooling (name only what you've used)
+LangSmith (datasets, experiments, evaluators, prompt versions), Langfuse, Arize Phoenix, Braintrust, promptfoo (CLI/CI-friendly), DeepEval / RAGAS (metric libraries), OpenAI Evals, Inspect. Pytest for deterministic checks around them.
+
+## 12.11 Questions and sample answers
 
 **Q1. How do you evaluate an agent?**
 > At multiple levels. Component level: tool-selection and argument accuracy against labeled cases, and retrieval recall for RAG. End-to-end: task completion verified against actual system state in a sandbox, plus hallucination/faithfulness, safety, steps, latency, and cost. I use code-based checks wherever possible, LLM-as-judge for subjective qualities with a calibrated rubric, and human review to calibrate. It runs in CI as a regression gate with multiple trials to handle non-determinism, and production failures feed back into the dataset.
@@ -886,9 +1150,12 @@ assert report["tool_accuracy"] >= 0.95, report
 **Q7. How do you evaluate multi-step trajectory, not just final answer?**
 > Score the trajectory: correct tool order, no unnecessary calls, no forbidden calls, recovered from errors, within step budget. Trajectory evals catch cases where the answer was right by luck or the agent took a risky path.
 
+**Q8. How do you evaluate a multi-turn conversational agent?**
+> Simulated users: an LLM plays the customer from a scenario card while the agent uses sandboxed tools, and I grade the final database/API state plus policy compliance. I run each scenario several times and report pass^k (passes every time), because consistency matters more than a lucky single pass. I spot-check transcripts to keep the simulator honest.
+
 ---
 
-# 13. Topic 11: Observability and Tracing 🟠🔴
+# 13. Observability and Tracing 🟠🔴
 
 ## 13.1 Simple explanation
 Agents are multi-step and non-deterministic: when something goes wrong, you need to see exactly what the model saw, decided, and what tools returned. Observability = **traces + metrics + logs + evals** tied together.
@@ -931,7 +1198,7 @@ Redact PII/secrets before logging, role-based access to traces, retention limits
 
 ---
 
-# 14. Topic 12: Security, Guardrails, Access Control, Audit 🔴🔴 (explicit in JD)
+# 14. Security, Guardrails, Access Control, Audit 🔴🔴 (explicit in JD)
 
 ## 14.1 Threat model for agents
 | Threat | Description | Example |
@@ -965,6 +1232,22 @@ Redact PII/secrets before logging, role-based access to traces, retention limits
 
 > **The "lethal trifecta" (useful phrase):** an agent with (1) access to private data, (2) exposure to untrusted content, and (3) ability to communicate externally is dangerous. Break at least one leg.
 
+## 14.2a OWASP Top 10 for LLM Applications (2025): name-drop with one-line defenses
+| # | Risk | Your one-line defense |
+|---|---|---|
+| LLM01 | Prompt injection (direct + indirect) | Least privilege, authz in code, untrusted-content isolation, HITL |
+| LLM02 | Sensitive information disclosure | Data-layer ACLs, PII redaction in/out, no secrets in prompts |
+| LLM03 | Supply chain (models, packages, MCP servers) | Vetted sources, pinned versions, signatures, SBOM |
+| LLM04 | Data and model poisoning | Curated ingestion, provenance, review of RAG sources |
+| LLM05 | Improper output handling | Treat output as untrusted: validate, escape, never exec/render raw |
+| LLM06 | Excessive agency | Minimal tools/scopes, read-only defaults, approval for writes |
+| LLM07 | System prompt leakage | Assume the system prompt is public; no secrets or authz logic in it |
+| LLM08 | Vector and embedding weaknesses | Tenant/ACL filters in the vector query, poisoning checks |
+| LLM09 | Misinformation | Grounding, citations, abstention, human review for high stakes |
+| LLM10 | Unbounded consumption | Rate limits, token/step/cost budgets per user/tenant |
+
+OWASP also publishes agentic-AI threat guidance (memory poisoning, tool misuse, privilege compromise, identity spoofing between agents); same defenses, applied per agent and per tool.
+
 ## 14.3 Access control patterns
 - **RBAC/ABAC**: roles/attributes determine allowed tools/data.
 - **Per-tool scopes** (`crm:read`, `crm:write`) checked on every call.
@@ -982,7 +1265,7 @@ Redact PII/secrets before logging, role-based access to traces, retention limits
 - **Input guardrails**: injection detection, PII detection, topic/scope restriction, toxicity.
 - **Output guardrails**: PII/secret leakage, policy compliance, groundedness checks, format validation.
 - **Action guardrails**: tool allowlists, parameter bounds (e.g., refund ≤ $X), approval requirements.
-- **Tools/frameworks** (name what you know): NeMo Guardrails, Guardrails AI, Llama Guard-style classifiers, provider moderation endpoints, custom rules.
+- **Tools/frameworks** (name what you know): NeMo Guardrails, Guardrails AI, Llama Guard-style classifiers, prompt-injection classifiers (e.g., Prompt Guard-style), provider moderation endpoints, Microsoft Presidio (PII detection/redaction), custom rules.
 - Trade-off: guardrails add latency and false positives; tune by risk level.
 
 ## 14.6 Questions and sample answers
@@ -1014,9 +1297,15 @@ Redact PII/secrets before logging, role-based access to traces, retention limits
 **Q9. How do you red-team an agent?**
 > Build an adversarial test set: direct and indirect injections, jailbreaks, data-exfil attempts, privilege escalation, tool-misuse, cross-tenant probes. Run automatically in CI, track attack-success rate, and add any successful attack to regression tests.
 
+**Q10. Which OWASP LLM risks matter most for a tool-using enterprise agent?**
+> Prompt injection, excessive agency, sensitive information disclosure, and improper output handling, because the agent reads untrusted content and can act on business systems. Unbounded consumption follows close behind, since loops can burn budget. My defenses map one-to-one: authorization in code, least-privilege tools, data-layer filters, output validation, and budgets.
+
+**Q11. What about the agent's own identity?**
+> Each agent gets its own identity (service principal) for audit, but acts on behalf of the user with delegated, scoped, short-lived tokens. Logs record both who asked (the user) and who acted (the agent), so every action is traceable and never exceeds what the user could do.
+
 ---
 
-# 15. Topic 13: NLP/NLU, Classification, Automation 🟠
+# 15. NLP/NLU, Classification, Automation 🟠
 
 ## 15.1 Concepts
 - **NLU tasks**: intent classification, entity extraction (NER), slot filling, sentiment, topic classification, summarization, translation.
@@ -1033,6 +1322,7 @@ Precision, recall, F1 (macro vs micro), confusion matrix, per-class performance,
 - **Summarization**: faithful, structured (action items, decisions, owners), length control; evaluate faithfulness.
 - **PII** in transcripts: redaction.
 - **Multilingual**: language detection, multilingual embeddings.
+- Real-time voice agents get their own part: see **Part 16**.
 
 ## 15.4 Questions and sample answers
 
@@ -1050,9 +1340,63 @@ Precision, recall, F1 (macro vs micro), confusion matrix, per-class performance,
 
 ---
 
-# 16. Topic 14: SQL and NoSQL in AI Pipelines 🔴/🟠
+# 16. Voice and Real-Time Agents 🟠🔴 (RingCentral domain)
 
-## 16.1 Where databases fit
+## 16.1 Why this matters here
+RingCentral's business is calls, meetings, messaging and contact centers. Expect at least one question that is voice- or call-shaped: an AI receptionist, live agent-assist, post-call summaries, or call routing. *(Check their current AI products on ringcentral.com before the interview, e.g., AI receptionist, conversation intelligence, contact-center AI; mention only what you've actually read.)*
+
+## 16.2 Two architectures
+| | **Cascaded (ASR → LLM → TTS)** | **Speech-to-speech (realtime model)** |
+|---|---|---|
+| Flow | Speech-to-text → text LLM (+tools) → text-to-speech | One model takes audio in and produces audio out (with tool calling) |
+| Pros | Mix best components, inspect/log text at each step, easy guardrails, any LLM | Lowest latency, keeps tone/emotion, natural interruptions |
+| Cons | Latency adds up across 3 stages; loses tone | Less control, harder to evaluate/guard, fewer model choices, often pricier |
+| Use when | Enterprise control, compliance, complex tools | Latency-critical, conversational UX |
+
+## 16.3 Latency budget (talk in numbers)
+Humans expect a reply within roughly **0.5-1 s** of finishing speaking. Rough cascaded budget:
+`end-of-turn detection (~200-300 ms) + ASR final (~100-300 ms) + LLM time-to-first-token (~200-500 ms) + TTS first audio (~100-200 ms) + network`
+
+**Levers:** stream everything (partial ASR, token streaming into TTS sentence by sentence), small fast model for the first response, prompt caching, keep tool calls fast or say a filler ("Let me check that…") while a slow tool runs, co-locate services, keep the prompt short.
+
+## 16.4 Hard problems specific to voice
+- **Turn detection / endpointing**: when has the caller finished? Silence-based VAD is crude; semantic turn detection does better. Too eager = interrupting; too slow = laggy.
+- **Barge-in (interruptions)**: caller talks over the bot → stop TTS immediately, cancel the in-flight LLM call, and record what was actually *spoken*, not what was generated, so history stays truthful.
+- **ASR errors**: names, emails, account numbers get mangled → confirm critical values back ("That's 4-5-1-2, correct?"), use spelling/DTMF (keypad) for IDs, and keep custom vocabulary for product names.
+- **Telephony**: 8 kHz audio, noise, SIP/WebRTC/media streams, call transfer to a human (warm transfer with a summary), hold, DTMF.
+- **Voice-friendly output**: short sentences, no markdown/lists/URLs, numbers spoken naturally, one question at a time.
+- **Compliance**: call-recording consent, PII/PCI (pause recording during card numbers; never send card data to the LLM), retention rules, disclosure that the caller is talking to AI where required.
+
+## 16.5 Real-time agent-assist (human agent on a live call)
+Stream transcript → detect intent/topics every few seconds → retrieve KB articles/next-best-action → show suggestions in the agent's UI (never speak them to the customer) → post-call: summary, disposition, CRM update. Key metrics: suggestion latency, suggestion acceptance rate, handle time, and after-call-work time saved.
+
+## 16.6 Evaluating voice agents
+- Component: ASR word error rate (especially on entities), turn-detection accuracy, TTS quality.
+- End-to-end: task success on simulated calls (TTS-generated callers with noise and accents), latency p50/p95 per turn, interruption handling, transfer rate, containment rate (resolved without a human), CSAT.
+- Replay recorded (consented, redacted) calls through new versions as a regression suite.
+
+## 16.7 Questions and sample answers
+
+**Q1. Design an AI receptionist that answers business calls, books appointments and transfers to staff.**
+> Telephony media stream into a voice pipeline: streaming ASR plus semantic turn detection, an LLM agent with tools (`check_availability`, `book_appointment`, `lookup_contact`, `transfer_call`), and streaming TTS. LangGraph keeps conversation state per call ID, with a checkpointer so a dropped leg can recover. Writes like bookings are idempotent and read back for confirmation. Critical values are confirmed out loud or via DTMF. Transfers are warm, passing a summary to the human. Guardrails: business-hours and policy rules in code, no payment data to the LLM, AI disclosure. Observability: per-turn latency breakdown, transcript plus tool trace per call. Evals: simulated callers with noise and accents, graded on booking state, measuring containment, transfer rate and p95 turn latency.
+
+**Q2. The voice bot feels slow. How do you fix it?**
+> Break the latency down per stage from traces: endpointing, ASR, LLM time-to-first-token, tool time, TTS first audio. Typical fixes: faster turn detection, streaming LLM tokens into TTS by sentence, a smaller model for the first response, prompt caching, parallel or prefetched tool calls, filler speech during slow tools, co-located regions. Or move to a speech-to-speech model if control requirements allow.
+
+**Q3. How do you handle the caller interrupting the bot?**
+> Detect speech during playback with VAD, stop TTS within a few hundred milliseconds, cancel the in-flight generation, and truncate the assistant message in history to what was actually played, so the model doesn't think it said things the caller never heard. Then process the new utterance.
+
+**Q4. Cascaded vs speech-to-speech for a contact center?**
+> Cascaded by default in an enterprise contact center: text at each step means I can apply PII redaction, guardrails, audit logs and evals, and pick the best LLM for tool calling. Speech-to-speech where latency and naturalness dominate and the task is lower risk. Both should sit behind the same tool layer and policies.
+
+**Q5. How would you build post-call summarization into the CRM?**
+> After the call: diarized transcript → PII redaction → structured extraction (reason for call, resolution, action items with owners and dates, sentiment) validated by a schema → optional agent review screen → idempotent CRM update keyed by call ID → audit log. Evaluate faithfulness and field-level extraction accuracy against human-labeled calls.
+
+---
+
+# 17. SQL and NoSQL in AI Pipelines 🔴/🟠
+
+## 17.1 Where databases fit
 - **Source of truth** for business data tools query (orders, customers).
 - **Conversation/checkpoint state** (Postgres/Redis/MongoDB/DynamoDB).
 - **Vector storage** (pgvector, etc.) and metadata.
@@ -1060,14 +1404,14 @@ Precision, recall, F1 (macro vs micro), confusion matrix, per-class performance,
 - **Caches** (Redis) for embeddings/LLM responses/rate limits.
 - **Data pipelines** feeding RAG ingestion (ETL/ELT, CDC).
 
-## 16.2 SQL vs NoSQL: choose by access pattern
+## 17.2 SQL vs NoSQL: choose by access pattern
 | | SQL (Postgres/MySQL) | NoSQL |
 |---|---|---|
 | Strengths | Joins, transactions (ACID), strong schema, rich queries | Flexible schema, horizontal scale, low-latency key access |
 | Types | Relational | Document (MongoDB), Key-value (Redis/DynamoDB), Wide-column (Cassandra), Graph (Neo4j) |
 | AI uses | Structured business data, text-to-SQL, pgvector, audit logs | Conversation docs, session store/cache, semi-structured events, graph knowledge |
 
-## 16.3 SQL skills to refresh (likely coding questions)
+## 17.3 SQL skills to refresh (likely coding questions)
 - `JOIN` types, `GROUP BY`/`HAVING`, window functions (`ROW_NUMBER`, `RANK`, `LAG`), CTEs, subqueries, `EXISTS`
 - Indexes (B-tree), composite index order, covering index, `EXPLAIN` / query plans, N+1 problem
 - Transactions, isolation levels, deadlocks, idempotent upserts (`INSERT ... ON CONFLICT`)
@@ -1087,7 +1431,7 @@ VALUES ($1, $2, $3)
 ON CONFLICT (idempotency_key) DO NOTHING;
 ```
 
-## 16.4 Questions and sample answers
+## 17.4 Questions and sample answers
 
 **Q1. Text-to-SQL: how do you make it reliable and safe?**
 > Give the model a curated schema (relevant tables/columns with descriptions and example rows), few-shot examples of correct queries, and ask for SQL only. Validate: parse, enforce SELECT-only, allowlist tables, add LIMIT/timeouts, run through a read-only role with row-level security. On errors, feed the DB error back for a bounded self-correction. Evaluate with execution-accuracy against a labeled question set. For critical numbers, prefer pre-built parameterized query tools over free-form SQL.
@@ -1109,9 +1453,9 @@ ON CONFLICT (idempotency_key) DO NOTHING;
 
 ---
 
-# 17. Topic 15: Full-Stack Delivery 🟠
+# 18. Full-Stack Delivery 🟠
 
-## 17.1 Concepts
+## 18.1 Concepts
 - **API layer**: REST (FastAPI/Express); request/response schemas (Pydantic/Zod); auth (JWT/OAuth); versioning.
 - **Streaming**: SSE (simple, one-way, great for token streaming) vs WebSockets (bi-directional, e.g., voice/live). Handle disconnects, backpressure, cancellation.
 - **Async**: Python `asyncio`/FastAPI async endpoints; Node event loop. Don't block the loop with CPU work or sync I/O.
@@ -1121,28 +1465,38 @@ ON CONFLICT (idempotency_key) DO NOTHING;
 - **Rate limiting, auth, CORS, input size limits.**
 - **Testing**: unit, integration (mocked LLM), e2e.
 
-## 17.2 FastAPI SSE streaming sketch
+## 18.2 FastAPI SSE streaming sketch
 
 ```python
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, Request
 from fastapi.responses import StreamingResponse
-import json
+from pydantic import BaseModel
+import json, logging
 
 app = FastAPI()
+log = logging.getLogger("api")
+
+class ChatRequest(BaseModel):
+    message: str
+    thread_id: str
 
 @app.post("/chat")
-async def chat(req: ChatRequest, user=Depends(auth)):
+async def chat(req: ChatRequest, request: Request, user=Depends(auth)):   # auth = your auth dependency
     async def event_stream():
         try:
             async for event in agent.astream(req.message, user=user, thread_id=req.thread_id):
+                if await request.is_disconnected():      # client left: stop paying for tokens
+                    break
                 yield f"data: {json.dumps(event)}\n\n"
         except Exception:
+            log.exception("stream failed")              # details in logs, generic message to client
             yield f"data: {json.dumps({'type': 'error', 'message': 'Something went wrong'})}\n\n"
         yield "data: [DONE]\n\n"
-    return StreamingResponse(event_stream(), media_type="text/event-stream")
+    return StreamingResponse(event_stream(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 ```
 
-## 17.3 Questions and sample answers
+## 18.3 Questions and sample answers
 
 **Q1. How do you deliver streaming LLM responses to a frontend?**
 > SSE from the backend streaming token and step events (including tool-start/tool-end), the frontend renders incrementally, shows tool progress, handles errors/cancel, and reconnects safely. For bi-directional needs like voice, WebSockets. The backend stays stateless, with state in a checkpoint store.
@@ -1158,11 +1512,11 @@ async def chat(req: ChatRequest, user=Depends(auth)):
 
 ---
 
-# 18. Topic 16: Coding Questions (Python/Node) 🔴
+# 19. Coding Questions (Python/Node) 🔴
 
 Be ready to write these **without looking**. Practice each on a blank editor.
 
-## 18.1 Python
+## 19.1 Python
 
 **A. Retry decorator with exponential backoff + jitter**
 ```python
@@ -1253,18 +1607,31 @@ class TokenBucket:
             return False
 ```
 
-**G. Conversation trimmer by token budget**
+**G. Conversation trimmer by token budget (keeps tool calls and results paired)**
 ```python
+def group_turns(msgs):
+    """Group an assistant message with tool calls together with its tool results."""
+    groups = []
+    for m in msgs:
+        if m["role"] == "tool" and groups:         # tool result belongs to the previous group
+            groups[-1].append(m)
+        else:
+            groups.append([m])
+    return groups
+
 def trim_messages(messages, count_tokens, budget):
     system, rest = messages[0], messages[1:]
     kept, used = [], count_tokens(system)
-    for m in reversed(rest):                       # keep most recent
-        t = count_tokens(m)
+    for group in reversed(group_turns(rest)):      # keep most recent, whole groups only
+        t = sum(count_tokens(m) for m in group)
         if used + t > budget:
             break
-        kept.append(m); used += t
-    return [system] + list(reversed(kept))
+        kept[:0] = group; used += t
+    while kept and kept[0]["role"] != "user":     # history should start at a user turn
+        kept.pop(0)
+    return [system] + kept
 ```
+> Why: dropping an assistant `tool_call` but keeping its `tool` result (or the reverse) makes the provider reject the request.
 
 **H. Detect repeated tool calls (loop guard)**
 ```python
@@ -1292,7 +1659,7 @@ const parsed = Ticket.safeParse(JSON.parse(raw));
 if (!parsed.success) { /* feed parsed.error back to the model, retry */ }
 ```
 
-## 18.2 Node.js
+## 19.2 Node.js
 
 **Tool loop skeleton (concept)**
 ```js
@@ -1319,18 +1686,24 @@ async function agent(llm, tools, messages, maxSteps = 8) {
 ```js
 app.post("/chat", async (req, res) => {
   res.set({ "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive" });
+  res.flushHeaders();                                // send headers now so the client starts listening
   const ac = new AbortController();
   req.on("close", () => ac.abort());                 // cancel upstream on disconnect
-  for await (const ev of agent.stream(req.body.message, { signal: ac.signal })) {
-    res.write(`data: ${JSON.stringify(ev)}\n\n`);
+  try {
+    for await (const ev of agent.stream(req.body.message, { signal: ac.signal })) {
+      res.write(`data: ${JSON.stringify(ev)}\n\n`);
+    }
+  } catch (e) {
+    if (!ac.signal.aborted) res.write(`data: ${JSON.stringify({ type: "error", message: "Something went wrong" })}\n\n`);
+  } finally {
+    res.end();
   }
-  res.end();
 });
 ```
 
 **Python/Node concepts to refresh:** `asyncio` vs threads vs processes (GIL), generators/async generators, context managers, type hints/dataclasses/Pydantic, decorators, exceptions, logging; Node event loop, promises/async-await, streams, `Promise.all` vs `allSettled`, worker threads, TypeScript basics.
 
-## 18.3 Debugging exercise patterns
+## 19.3 Debugging exercise patterns
 Be ready to review code and spot:
 1. Missing `await` / blocking call in async path.
 2. Unbounded loop without max steps.
@@ -1345,9 +1718,9 @@ Be ready to review code and spot:
 
 ---
 
-# 19. Topic 17: Cloud, Docker, CI/CD 🟢 (nice-to-have)
+# 20. Cloud, Docker, CI/CD 🟢 (nice-to-have)
 
-## 19.1 Essentials
+## 20.1 Essentials
 - **Docker**: image vs container, Dockerfile layers/caching, multi-stage builds, non-root user, `.dockerignore`, health checks, env vars/secrets (not baked into images), small base images.
 - **CI/CD (GitHub Actions)**: triggers (`push`, `pull_request`), jobs/steps, caching, secrets, matrix builds, pipeline: lint → unit tests → **evals** → build image → deploy (staging → prod), environment protection/approvals.
 - **Cloud (AWS/GCP)**: compute (ECS/EKS/Lambda/Cloud Run), queues (SQS/PubSub), storage (S3/GCS), managed DB, secrets manager (AWS Secrets Manager/GCP Secret Manager), IAM least privilege, VPC/private networking, managed LLM endpoints (Bedrock/Vertex AI).
@@ -1355,7 +1728,7 @@ Be ready to review code and spot:
 - **Scaling**: stateless services, autoscaling on CPU/queue depth, concurrency limits tied to LLM rate limits.
 - **IaC**: Terraform basics.
 
-## 19.2 Example GitHub Actions snippet
+## 20.2 Example GitHub Actions snippet
 ```yaml
 name: ci
 on: [pull_request]
@@ -1372,8 +1745,9 @@ jobs:
         env:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
 ```
+> Gotcha: PRs from forks can't read repository secrets, so the eval step fails or is skipped there. Run the LLM evals on internal branches, on merge, or behind a manual approval. Also cache LLM responses or use a small smoke set so every PR doesn't burn budget.
 
-## 19.3 Questions and sample answers
+## 20.3 Questions and sample answers
 
 **Q1. How would you deploy an agent service?**
 > Containerize it (multi-stage Docker, non-root), run on managed compute (ECS/Cloud Run/K8s), stateless with state in Postgres/Redis, secrets from a secrets manager, IAM least privilege, autoscaling, health checks, and observability. CI runs unit tests and regression evals; deploy via canary with automatic rollback; prompts/model versions are versioned config.
@@ -1386,9 +1760,9 @@ jobs:
 
 ---
 
-# 20. Topic 18: Cost, Latency and Reliability 🟠🔴
+# 21. Cost, Latency and Reliability 🟠🔴
 
-## 20.1 Latency levers
+## 21.1 Latency levers
 - **Stream** tokens (time-to-first-token matters for UX).
 - **Smaller/faster model** for routing/classification/simple steps; big model only where needed (model cascade).
 - **Prompt caching** and shorter prompts; fewer tools in context.
@@ -1399,13 +1773,13 @@ jobs:
 - **Async/background** for non-interactive work.
 - **Speculative/precompute**: pre-retrieve while the user is typing; precompute summaries.
 
-## 20.2 Cost levers
+## 21.2 Cost levers
 - Right-size models (cascade/routing), caching, prompt compression, retrieve fewer/better chunks (rerank), cap steps/tokens, batch APIs for offline jobs, avoid re-embedding unchanged docs, monitor cost per task and set budgets/alerts.
 
-## 20.3 Reliability levers
+## 21.3 Reliability levers
 - Timeouts, retries with backoff, circuit breakers, fallbacks (alternate model/provider, cached response, human escalation), graceful degradation (e.g., answer without tool X and say so), idempotency, queueing, load shedding, rate limiting, SLOs (success rate, p95 latency), runbooks.
 
-## 20.4 Questions and sample answers
+## 21.4 Questions and sample answers
 
 **Q1. Your agent takes 25s per request. How do you reduce it?**
 > Profile the trace to see where time goes: LLM calls, tool calls, retrieval. Then: parallelize independent calls, cut unnecessary steps (merge tools, use deterministic workflow), use a faster model for routing/simple steps, shrink prompts/tool schemas and enable prompt caching, stream so perceived latency drops, and cache repeat work. Set per-step budgets and track p95.
@@ -1424,11 +1798,11 @@ jobs:
 
 ---
 
-# 21. System Design Questions (with outlines)
+# 22. System Design Questions (with outlines)
 
 Use this structure: **Clarify → Requirements → Architecture → Data flow → Key decisions/trade-offs → Failure modes → Security → Evaluation/monitoring → Scale/cost → Evolution.**
 
-## 21.1 Design an enterprise knowledge assistant (RAG) for support agents
+## 22.1 Design an enterprise knowledge assistant (RAG) for support agents
 - **Clarify:** data sources, users, latency, accuracy vs freshness, permissions, languages, volume.
 - **Ingestion:** connectors (Confluence/SharePoint/Zendesk) → parse → chunk with structure/metadata (ACL, product, date) → embeddings → vector store + BM25 index; incremental sync via webhooks/CDC.
 - **Query:** auth → rewrite with history → hybrid retrieval with ACL filters → rerank → prompt with citations → stream → grounding check → feedback capture.
@@ -1437,24 +1811,33 @@ Use this structure: **Clarify → Requirements → Architecture → Data flow �
 - **Failure modes:** stale index, parsing errors, no-answer cases (abstain), conflicting docs (prefer newest/authoritative).
 - **Trade-offs:** chunk size, reranker latency vs precision, freshness vs cost.
 
-## 21.2 Design a tool-using agent that handles "create ticket / look up account / schedule callback"
+## 22.2 Design a tool-using agent that handles "create ticket / look up account / schedule callback"
 - Router → specialist tools (read tools open, write tools gated) → typed state in LangGraph with checkpointer → human approval interrupt for risky writes → idempotent create → OAuth delegated identity → audit trail → evals (tool accuracy, task completion, safety) → tracing → fallback/escalation.
 
-## 21.3 Design an evaluation and regression platform for agents
+## 22.3 Design an evaluation and regression platform for agents
 - Dataset store (versioned), runner (parallel, multi-trial), mock/sandbox tools, metrics (code checks + LLM judge calibrated), reporting (diffs vs baseline by category), CI gates, nightly large runs, production-trace-to-dataset pipeline with PII scrubbing, dashboards.
 
-## 21.4 Design a call/meeting summarization + CRM update pipeline
+## 22.4 Design a call/meeting summarization + CRM update pipeline
 - Transcript ingestion (streaming/batch) → PII redaction → chunking/hierarchical summarization → structured extraction (action items, sentiment, next steps) → validation → human-review option → CRM update through idempotent connector → audit → evals for faithfulness and extraction accuracy → monitoring.
 
-## 21.5 Design an MCP-style tool registry for multi-agent systems
+## 22.5 Design an MCP-style tool registry for multi-agent systems
 - Tool metadata/schemas/versions/scopes/risk levels → discovery API → per-agent/user scoping → policy enforcement → rate limiting → audit → health checks → contract tests → deprecation flow. Security: vetted servers, signed manifests, description sanitization.
 
-## 21.6 Design guardrails for an agent with write access
+## 22.6 Design guardrails for an agent with write access
 - Layered: input classifier → tool allowlist per role → parameter policy checks → human approval tiers → output scanning → egress allowlist → audit/anomaly detection → red-team CI.
+
+## 22.7 Design an AI voice receptionist / contact-center voice agent
+- Full answer in **16.7 Q1**. Skeleton: telephony stream → streaming ASR + turn detection → LangGraph agent (per-call state, checkpointer) with scoped tools → streaming TTS; barge-in handling; confirm critical values; warm transfer with summary; PCI/PII rules; per-turn latency budget; simulated-caller evals (containment, transfer rate, p95 turn latency).
+
+## 22.8 Design live agent-assist for human contact-center agents
+- Streaming transcript → rolling intent/topic detection (small fast model) → agentic RAG over KB + customer context from CRM (user-delegated, read-only) → suggestions pushed to the agent's UI over WebSocket (never auto-spoken) → post-call summary + disposition + idempotent CRM write after agent review → metrics: suggestion latency, acceptance rate, handle time, after-call work saved → evals on recorded (consented, redacted) calls.
+
+## 22.9 Design a multi-agent system across teams (MCP + A2A)
+- Orchestrator agent (LangGraph supervisor) → internal specialists as subgraphs → tools exposed via MCP servers registered in the tool registry (scopes, risk level, owner, pinned definitions) → external/partner agents reached via A2A (Agent Cards, task lifecycle, mutual auth) → every boundary validates schemas and treats the other side's output as untrusted → one trace ID across agents → global step/cost budget → per-agent and end-to-end evals.
 
 ---
 
-# 22. Production Incidents and Debugging Playbook
+# 23. Production Incidents and Debugging Playbook
 
 **Generic method:** Reproduce → Isolate (trace) → Hypothesize → Test → Fix → Prevent (regression test + monitoring).
 
@@ -1472,12 +1855,16 @@ Use this structure: **Clarify → Requirements → Architecture → Data flow �
 | 429s | Burst traffic | Rate headers, concurrency | Queue, backoff, limits, multiple keys/regions per policy |
 | Works locally, fails in prod | Env differences, secrets, network, data scale | Config, egress rules | Parity, staging, health checks |
 | Random failures | Non-determinism, flaky downstream | Multi-trial results | Retries, determinism, stable test fixtures |
+| "Invalid request" after long chats | History trimming broke a tool_call/tool_result pair | The exact message list sent | Trim whole turns (19.1 G) |
+| Behavior changed with no deploy | MCP server/tool description changed, provider model alias moved | Tool definition hashes, model ID in traces | Pin/hash tool definitions, pin model snapshots |
+| Action ran twice after a restart | Side effect before `interrupt()` or in a non-idempotent node replayed from checkpoint | Checkpoint history, audit log | Move side effects after the interrupt, idempotency keys |
+| Voice bot laggy / talks over callers | Slow endpointing, no streaming to TTS, no barge-in | Per-stage latency per turn | Streaming, turn detection tuning, cancel on barge-in |
 
 **Incident-response script (say this):** "First I stop the bleeding, with rollback/feature flag/disable the risky tool. Then I use traces to find the first wrong step, reproduce with recorded inputs, fix, add a regression test, and write a blameless postmortem with monitoring to catch it earlier next time."
 
 ---
 
-# 23. Project Deep-Dive Framework 🔴
+# 24. Project Deep-Dive Framework 🔴
 
 Interviewers will pick a project from your résumé and **drill**. Prepare **2-3 projects** using this template. **Fill with true details only.**
 
@@ -1514,40 +1901,40 @@ PROJECT: ______________________
 
 ---
 
-# 24. HR and Behavioral Answers (templates: fill with your truth)
+# 25. HR and Behavioral Answers (templates: fill with your truth)
 
-## 24.1 Tell me about yourself (90 seconds): structure
+## 25.1 Tell me about yourself (90 seconds): structure
 > "I'm a software engineer with **[X years]** of experience, most recently working on **[domain]** at **[company]**. Over the last **[Y]** I've focused on **LLM and agentic systems**: **[1-2 true things you built, e.g., RAG pipeline / tool-calling agent / eval harness / integration]**, using **[Python/Node, LangChain/LangGraph, vector DB, cloud]**. What I enjoy most is making AI systems **reliable in production**: evaluation, observability, and safe tool integration. This role stood out because it's exactly that: building agentic applications and RAG pipelines connected to enterprise systems, with evaluation and guardrails as first-class concerns. I'm excited to do it at RingCentral's scale."
 
 Rules: Present → past → future; relevant to the JD; under 2 minutes; end on why this role.
 
-## 24.2 Why are you looking for a change?
+## 25.2 Why are you looking for a change?
 > "I'm proud of what I've built at **[company]**, and I've grown a lot. I'm looking for a role with **deeper focus on production agentic systems and enterprise-scale integrations**, and where I can work with a strong platform architecture and team. This role matches that direction."
 (Positive, forward-looking. **Never** badmouth your employer.)
 
-## 24.3 Why RingCentral?
+## 25.3 Why RingCentral?
 - Communications platform at scale (voice, video, messaging, contact center): rich data and real use cases for AI (summaries, agent-assist, automation).
 - Open platform + integrations with business apps = real enterprise integration challenges.
 - Role emphasizes reliability, evals, guardrails: matches your interests.
 - *Do a 15-minute research pass:* RingCentral's AI products/announcements (check their website/blog) and mention **one specific thing** you genuinely find interesting. Don't claim knowledge you don't have.
 
-## 24.4 Why should we hire you?
+## 25.4 Why should we hire you?
 > "You need someone who can ship agentic features **and** make them dependable. I bring **[true strengths mapped to JD: Python/Node, LangChain/LangGraph, RAG, tool integrations]**, plus a habit of measuring: evals, tracing, and guardrails, and I'm comfortable working inside an established architecture, raising gaps constructively rather than going rogue."
 
-## 24.5 Strengths (pick 2-3 *true* ones, with evidence)
+## 25.5 Strengths (pick 2-3 *true* ones, with evidence)
 Examples: debugging complex systems; ownership end-to-end; learning quickly (new frameworks); communication/documentation; quality mindset (tests/evals).
 Format: **Strength → short real example → result.**
 
-## 24.6 Weakness (real, low-risk, with improvement)
+## 25.6 Weakness (real, low-risk, with improvement)
 Examples (choose a true one): over-investing in perfecting details → now timebox; hesitance to delegate → now share early/ask for reviews; limited cloud-ops depth → doing X to improve.
 Format: **Weakness → what I've done → current state.**
 
-## 24.7 Salary expectations & notice period
+## 25.7 Salary expectations & notice period
 - **Notice period:** state it plainly and truthfully; mention negotiability only if true.
 - **Salary:** research market range for this role/location; give a **range** anchored on research and your current compensation, and say you're flexible depending on the total package and role scope. (e.g., "Based on my research and experience, I'm looking at **[range]**, but I'm open to discussing based on the overall package.")
 - Prepare numbers *before* the interview: current CTC (fixed + variable), expected, notice period/buyout possibility.
 
-## 24.8 Behavioral questions (STAR: Situation, Task, Action, Result)
+## 25.8 Behavioral questions (STAR: Situation, Task, Action, Result)
 Prepare **one true story each** (reuse across questions):
 1. **Ownership**: something you drove end-to-end without being asked.
 2. **Hard bug/incident**: how you debugged under pressure.
@@ -1560,14 +1947,14 @@ Prepare **one true story each** (reuse across questions):
 
 **Tied to this JD:** *"Tell me about a time you found a gap in an existing architecture/process."* → "I documented it with evidence and impact, raised it with the owning team with a proposed fix, implemented a safe workaround within my scope meanwhile, and followed up." (Use a real example.)
 
-## 24.9 Questions about working style
+## 25.9 Questions about working style
 - **"How do you stay current with AI?"** → papers/blogs, provider release notes, hands-on experiments, internal sharing: *only what's true*.
 - **"How do you handle when LLM output isn't reliable enough for the business?"** → measure, narrow scope, add guardrails/human-in-loop, communicate limits honestly to stakeholders.
 - **"How do you explain AI limitations to non-technical stakeholders?"** → plain language, concrete examples, metrics, risk/benefit, mitigation plan.
 
 ---
 
-# 25. Top 30 Most Likely Questions
+# 26. Top 35 Most Likely Questions
 
 (Ordered roughly by likelihood. Know a 60-90 second answer for each.)
 
@@ -1601,10 +1988,15 @@ Prepare **one true story each** (reuse across questions):
 28. Describe a production incident you debugged and what you learned.
 29. What do you do when you find a gap in the existing architecture?
 30. Why RingCentral, why this role, why are you leaving, salary/notice?
+31. What's new in LangChain v1 / LangGraph (create_agent, middleware, interrupt/Command, Send, Store)? (8.6)
+32. What is agentic RAG, and when is it worth the extra cost? (6.7)
+33. What is context engineering? (10.1a)
+34. MCP vs A2A, and how do you secure remote MCP servers? (11.3-11.4)
+35. Design a voice AI receptionist / live agent-assist; how do you hit the latency budget? (Part 16)
 
 ---
 
-# 26. One-Page Revision Sheet
+# 27. One-Page Revision Sheet
 
 **Agent loop:** messages → LLM → tool_calls? → validate → authorize → execute (timeout) → append result → repeat; max steps; log everything.
 
@@ -1624,6 +2016,12 @@ Prepare **one true story each** (reuse across questions):
 
 **LangGraph:** State (reducers) · Nodes · Edges · Conditional edges · Checkpointer (thread_id) · Interrupt · Subgraphs · Recursion limit.
 
+**LangChain v1 / LangGraph new:** `create_agent` + middleware (summarize, HITL, limits) · `interrupt()` + `Command(resume=…)` (node re-runs on resume) · `Command(goto, update)` · `Send` fan-out · stream modes values/updates/messages/custom · checkpointer (per thread) vs Store (cross-thread memory) · durable execution · time travel.
+
+**Agentic RAG:** retrieval as a tool · route sources · grade → rewrite → retry (capped) · self-check grounding · contextual retrieval · GraphRAG for global questions.
+
+**Context engineering:** write · select · compress · isolate. Failures: poisoning, distraction, confusion, clash, context rot. Trim whole tool-call turns.
+
 **Multi-agent patterns:** supervisor, router, pipeline, fan-out/fan-in, handoff, critic. Start single; split for specialization/permissions.
 
 **Context management:** window + summary + retrieval + structured state + trimming tool outputs + token budgets + caching.
@@ -1634,7 +2032,15 @@ Prepare **one true story each** (reuse across questions):
 
 **Integrations:** OAuth delegated, few task-level tools, pagination/filter, rate-limit/backoff, idempotency, error mapping, webhooks (verify, dedupe), contract tests.
 
-**MCP:** protocol: client/server; tools/resources/prompts; stdio & HTTP; benefits: write once, reuse; risks: untrusted servers, tool poisoning, auth.
+**MCP:** protocol: client/server (JSON-RPC); tools/resources/prompts; sampling/elicitation; stdio & Streamable HTTP; OAuth 2.1, no token passthrough; annotations are hints only; benefits: write once, reuse; risks: untrusted servers, tool poisoning, rug pulls, auth.
+
+**A2A:** agent-to-agent protocol; Agent Cards for discovery; tasks with lifecycle. MCP = agent↔tools, A2A = agent↔agent.
+
+**OWASP LLM Top 10:** injection · info disclosure · supply chain · poisoning · improper output handling · excessive agency · system prompt leakage · vector/embedding weaknesses · misinformation · unbounded consumption.
+
+**Voice:** cascaded (ASR→LLM→TTS, control) vs speech-to-speech (latency); budget ≈ 0.5-1 s; turn detection, barge-in (truncate history to what was spoken), confirm IDs, warm transfer, PCI/PII; metrics: containment, transfer rate, p95 turn latency.
+
+**Evals extra:** simulated users + sandbox, grade end state, pass^k for consistency.
 
 **SQL safety:** read-only role, allowlisted tables, SELECT-only validation, LIMIT/timeout, RLS, curated schema.
 
@@ -1653,7 +2059,7 @@ Prepare **one true story each** (reuse across questions):
 
 ---
 
-# 27. Mistakes and Red Flags to Avoid
+# 28. Mistakes and Red Flags to Avoid
 
 **Technical**
 - ❌ "Just tell the model not to do X": prompt-only security.
@@ -1685,7 +2091,7 @@ Prepare **one true story each** (reuse across questions):
 
 ---
 
-# 28. Questions to Ask the Interviewer
+# 29. Questions to Ask the Interviewer
 
 **About the role/team**
 1. What does a typical agentic use case look like here, and what's the first thing this role would ship?
@@ -1710,9 +2116,9 @@ Prepare **one true story each** (reuse across questions):
 
 ---
 
-# 29. Mock Interview Tracker and Final Mock
+# 30. Mock Interview Tracker and Final Mock
 
-## 29.1 Tracker (fill after each mock question)
+## 30.1 Tracker (fill after each mock question)
 
 | # | Topic | Score /10 | Missing points | Revisit? |
 |---|---|---|---|---|
@@ -1726,14 +2132,17 @@ Prepare **one true story each** (reuse across questions):
 | 8 | Multi-agent design | | | |
 | 9 | SQL/text-to-SQL | | | |
 | 10 | Behavioral/ownership | | | |
+| 11 | LangGraph v1 (create_agent, interrupt, Send, Store) | | | |
+| 12 | Voice/real-time agents | | | |
+| 13 | MCP/A2A/tool registry | | | |
 
-## 29.2 Scoring rubric (be strict with yourself)
+## 30.2 Scoring rubric (be strict with yourself)
 - **9-10**: correct, structured, trade-offs, failure modes, measurement, real example.
 - **7-8**: correct and clear but missing depth/trade-offs/measurement.
 - **5-6**: partially correct, vague or buzzwords.
 - **<5**: incorrect or can't explain mechanism.
 
-## 29.3 Final mock interview: 12-question simulation (answer aloud, 2 min each)
+## 30.3 Final mock interview: 14-question simulation (answer aloud, 2 min each)
 1. Introduce yourself and walk me through your best LLM project.
 2. Your RAG assistant answers confidently but wrongly. Walk me through debugging.
 3. Design a tool-calling agent that creates support tickets in an enterprise ticketing system. What can go wrong?
@@ -1746,22 +2155,24 @@ Prepare **one true story each** (reuse across questions):
 10. Text-to-SQL: how do you make it safe and accurate?
 11. Tell me about a time you found a gap in an existing system or architecture. What did you do?
 12. Why RingCentral, notice period, expectations: and what questions do you have for us?
+13. Design an AI receptionist that books appointments over the phone. Where does the latency go?
+14. A write tool ran twice after the server restarted mid-run in LangGraph. Why, and how do you fix it?
 
 ---
 
-# 30. Last 24 Hours Checklist
+# 31. Last 24 Hours Checklist
 
 **Thursday evening**
-- [ ] Re-read Parts 5, 6, 8, 12, 14 (tool calling, RAG, LangGraph, evals, security).
-- [ ] Write out (from memory) the tool loop, RAG pipeline diagram, and eval harness skeleton.
-- [ ] Finalize 2-3 project stories (Part 23) and say them aloud.
+- [ ] Re-read Parts 5, 6, 8, 12, 14 (tool calling, RAG, LangGraph, evals, security) and skim Part 16 (voice).
+- [ ] Write out (from memory) the tool loop, RAG pipeline diagram, LangGraph HITL with `interrupt()`, and eval harness skeleton.
+- [ ] Finalize 2-3 project stories (Part 24) and say them aloud.
 - [ ] Prepare your intro (90 sec), "why change", "why RingCentral", salary range, notice period.
 - [ ] Research RingCentral for 15 minutes: products, AI announcements, recent news; pick 1-2 specifics.
 - [ ] Prepare 4-5 questions to ask.
 - [ ] Sleep 7+ hours.
 
 **Friday morning**
-- [ ] Skim Part 26 (revision sheet) and Part 25 (top 30). **No new topics.**
+- [ ] Skim Part 27 (revision sheet) and Part 26 (top 35). **No new topics.**
 - [ ] Test internet/camera/mic/IDE/screen-share; charge devices; quiet room; water.
 - [ ] Have your resume, the JD, and your project notes open.
 - [ ] Warm up: say your intro out loud once.
