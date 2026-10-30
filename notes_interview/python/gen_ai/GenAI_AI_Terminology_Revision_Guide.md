@@ -659,6 +659,101 @@ Source (PDF, DOCX, HTML, email, Confluence)
 | **Planner vs executor** | Builds the roadmap vs runs the steps | Strong model plans 5 steps; cheap model executes each |
 | **Copilot vs agent** | Assists a human vs acts | Suggests a reply vs sends it |
 
+### Agent Failure Modes ⭐ (very common question: "What goes wrong with agents?")
+
+| Failure | What happens (simple) | Example | How to fix |
+|---|---|---|---|
+| **Infinite loop** | Agent keeps repeating the same step | Calls `get_invoices("acme")` 8 times in a row | `max_steps`, detect **repeated identical calls**, cost budget |
+| **Wrong tool** | Picks the wrong tool for the job | Uses `refund()` when it should use `search_kb()` | Clear tool names + descriptions, fewer tools (Tool RAG), evals on tool choice |
+| **Hallucinated arguments** | Makes up tool inputs | `refund("inv_999")` — invoice doesn't exist | **Validate arguments in code** (schema + check ID exists) before running |
+| **Goal drift** | Forgets the original task mid-way | Asked to refund, ends up writing a long billing summary | Keep the goal in state / re-state it each step, stopping condition |
+| **Ignores tool errors** | Tool fails but agent pretends it worked | Refund API returns 500, agent says "Refund done ✅" | Pass errors back clearly, **verify step** before replying |
+| **Early stop / give up** | Stops before the job is finished | Finds duplicate charge but never issues refund | Success check ("is the task done?") before stopping |
+| **Unsafe action** | Does something risky without permission | Refunds $5,000 with no approval | Autonomy boundary + **HITL** for risky actions, enforced in code |
+| **Context overflow** | Too many tool results fill the context | 50 long tool outputs → model gets confused | Summarize/trim tool outputs, sub-agents for big tasks |
+
+**Diagram — where the safety checks sit in the agent loop:**
+```mermaid
+flowchart LR
+    D["🧠 Decide<br/>next step"] --> L{"Step / cost<br/>limit hit?"}
+    L -- yes --> STOP["🛑 Stop safely"]
+    L -- no --> V{"Tool args<br/>valid?"}
+    V -- no --> D
+    V -- yes --> R{"Risky<br/>action?"}
+    R -- yes --> H["👤 Human<br/>approves"] --> A
+    R -- no --> A["⚙️ Run tool"]
+    A --> C{"Task done<br/>& verified?"}
+    C -- no --> D
+    C -- yes --> OK["✅ Reply to user"]
+    style STOP fill:#fdd,stroke:#c00,color:#000
+    style OK fill:#dfd,stroke:#080,color:#000
+    style H fill:#ffd,stroke:#aa0,color:#000
+```
+👉 Every arrow back to **Decide** is a chance to fix a mistake; every check is **code**, not the model's choice.
+
+**Interview answer (say this):** *"Agents commonly fail by looping, picking the wrong tool, hallucinating arguments, drifting from the goal, or hiding tool errors. I guard against these with step and cost limits, schema validation on every tool call, approval for risky actions, a verification step before the final answer, and tracing plus trajectory evals so I can see exactly where a run went wrong."*
+
+### Tree of Thoughts (ToT)
+- **Simple idea:** Instead of thinking in **one straight line** (Chain-of-Thought), the model **tries several paths, scores them, and keeps the best one** — like exploring branches of a tree.
+- **Example:** "Why did Acme's bill go up?" → Path A: duplicate charge? Path B: plan upgrade? Path C: extra usage? → model checks each, Path A scores highest → follow it.
+- **Trade-off:** Better on hard problems, but **more LLM calls = more cost and latency**. Rarely needed in production.
+
+```mermaid
+flowchart TB
+    Q["❓ Why did Acme's bill go up?"] --> A["Path A:<br/>duplicate charge?"]
+    Q --> B["Path B:<br/>plan upgrade?"]
+    Q --> C["Path C:<br/>extra usage?"]
+    A --> SA["score: 9/10 ✅"]
+    B --> SB["score: 3/10 ❌"]
+    C --> SC["score: 4/10 ❌"]
+    SA --> F["Follow Path A"]
+    style SA fill:#dfd,stroke:#080,color:#000
+    style SB fill:#fdd,stroke:#c00,color:#000
+    style SC fill:#fdd,stroke:#c00,color:#000
+```
+👉 **CoT = one line of thinking. ToT = many branches, keep the best.**
+
+### Self-Consistency
+- **Simple idea:** Ask the **same question several times** (with some randomness), then take the **majority answer**.
+- **Example:** Classify a ticket 5 times → billing, billing, billing, tech, billing → answer = **billing**.
+- **Why:** One run can be wrong by chance; voting makes it more reliable. Same idea as **Parallelization (voting)** above.
+- **Trade-off:** 5 runs = ~5× cost. Use for important decisions, not every call.
+
+```mermaid
+flowchart LR
+    T["🎫 Ticket:<br/>'charged twice'"] --> R1["Run 1: billing"]
+    T --> R2["Run 2: billing"]
+    T --> R3["Run 3: tech"]
+    T --> R4["Run 4: billing"]
+    T --> R5["Run 5: billing"]
+    R1 & R2 & R3 & R4 & R5 --> V{"🗳️ Majority<br/>vote"}
+    V --> ANS["Answer: billing<br/>(4 of 5)"]
+    style R3 fill:#fdd,stroke:#c00,color:#000
+    style ANS fill:#dfd,stroke:#080,color:#000
+```
+👉 One wrong run (Run 3) is outvoted.
+
+### Parallel Tool Calls
+- **Simple idea:** When tool calls **don't depend on each other**, the model asks for them **all in one step** instead of one by one.
+- **Example:** Model requests `get_invoices("acme")` **and** `get_call_logs("acme")` together → both run at the same time → faster answer.
+- **Rule:** Only parallel when **independent**. If step 2 needs step 1's result (e.g., refund needs the invoice ID), it must be **sequential**.
+
+```mermaid
+flowchart LR
+    subgraph P["✅ Parallel — independent tools"]
+        direction LR
+        M1["Model"] --> G1["get_invoices(acme)"]
+        M1 --> G2["get_call_logs(acme)"]
+        G1 --> J["Both results<br/>back together"]
+        G2 --> J
+    end
+    subgraph S["➡️ Sequential — step 2 needs step 1"]
+        direction LR
+        M2["Model"] --> S1["get_invoices(acme)<br/>→ inv_123"] --> S2["refund(inv_123)"]
+    end
+```
+👉 **Independent → run together (faster). Dependent → one after another.**
+
 ### ✅ Section 5 Cheat Sheet
 - **Agent = LLM + tools + state in a loop** (decide → act → observe).
 - **ReAct** = Thought → Action → Observation.
@@ -666,6 +761,9 @@ Source (PDF, DOCX, HTML, email, Confluence)
 - **Multi-agent** = more cost and failure points; start with one agent.
 - **HITL + autonomy boundary + stopping conditions** = safety rails, enforced in code.
 - Patterns: **chaining, routing, parallelization, orchestrator-workers, evaluator-optimizer**.
+- **Failure modes:** loop, wrong tool, fake arguments, goal drift, hidden errors → fix with limits, validation, HITL, verify step, tracing.
+- **ToT** = try many reasoning paths, keep best. **Self-consistency** = ask many times, majority vote.
+- **Parallel tool calls** = run independent tools together; dependent ones stay sequential.
 
 ---
 
