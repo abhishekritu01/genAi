@@ -3,6 +3,7 @@
 > One consolidated guide built from `Python_interview_questions_part1.md` (Q1–Q50) and `Python_interview_questions_part2.md` (Q51–Q100).
 > Duplicates are merged, topics are ordered from fundamentals to advanced/backend, and every answer follows the same interview-ready format.
 > All code targets **Python 3** (tested on **Python 3.13**; minimum versions are noted where a feature needs one).
+> **Extended** with the missing topics from `python_theory.md` — every addition is marked *(Source: python_theory.md)* or *(theory notes)* and listed in the Appendix.
 
 ---
 
@@ -57,6 +58,7 @@ Every question follows the same structure so you can revise quickly:
   - [1.9 The Walrus Operator (`:=`)](#19-the-walrus-operator-)
   - [1.10 Comprehensions (List, Dict, Set, Generator)](#110-comprehensions-list-dict-set-generator)
   - [1.11 `enumerate()` and `zip()`](#111-enumerate-and-zip)
+  - [1.12 String Methods and Slicing](#112-string-methods-and-slicing)
 - [2. Standard Library Essentials](#2-standard-library-essentials)
   - [2.1 The `collections` Module (Counter, defaultdict, deque, namedtuple)](#21-the-collections-module-counter-defaultdict-deque-namedtuple)
   - [2.2 The `itertools` Module](#22-the-itertools-module)
@@ -69,6 +71,7 @@ Every question follows the same structure so you can revise quickly:
   - [3.4 Variable Scope: LEGB, `global`, `nonlocal`](#34-variable-scope-legb-global-nonlocal)
   - [3.5 Closures](#35-closures)
   - [3.6 Type Hints](#36-type-hints)
+  - [3.7 Recursion](#37-recursion)
 - [4. Exception Handling](#4-exception-handling)
   - [4.1 Exception Handling Best Practices](#41-exception-handling-best-practices)
 - [5. Object-Oriented Programming (OOP)](#5-object-oriented-programming-oop)
@@ -112,6 +115,8 @@ Every question follows the same structure so you can revise quickly:
   - [10.5 `async`/`await` and the Event Loop](#105-asyncawait-and-the-event-loop)
   - [10.6 Blocking the Event Loop (and How to Avoid It)](#106-blocking-the-event-loop-and-how-to-avoid-it)
   - [10.7 `asyncio.Queue` and the Producer–Consumer Pattern](#107-asyncioqueue-and-the-producerconsumer-pattern)
+  - [10.8 Thread Synchronization: Lock, RLock, Semaphore and Daemon Threads](#108-thread-synchronization-lock-rlock-semaphore-and-daemon-threads)
+  - [10.9 More asyncio Patterns (Error Handling, Async Generators, Rate Limiting)](#109-more-asyncio-patterns-error-handling-async-generators-rate-limiting)
 - [11. Performance & Optimization](#11-performance--optimization)
   - [11.1 Profiling Python Code](#111-profiling-python-code)
   - [11.2 Common Performance Anti-Patterns](#112-common-performance-anti-patterns)
@@ -129,6 +134,7 @@ Every question follows the same structure so you can revise quickly:
   - [12.11 API Versioning](#1211-api-versioning)
   - [12.12 Pagination (Offset vs Cursor)](#1212-pagination-offset-vs-cursor)
   - [12.13 Configuration and Environment Variables](#1213-configuration-and-environment-variables)
+  - [12.14 FastAPI Fundamentals: Routes, Parameters, HTTP Methods and the Request Lifecycle](#1214-fastapi-fundamentals-routes-parameters-http-methods-and-the-request-lifecycle)
 - [13. Databases, SQL & Redis](#13-databases-sql--redis)
   - [13.1 SQL JOINs (INNER, LEFT, FULL OUTER, CROSS)](#131-sql-joins-inner-left-full-outer-cross)
   - [13.2 Database Indexing](#132-database-indexing)
@@ -161,6 +167,10 @@ Every question follows the same structure so you can revise quickly:
   - [17.3 Common Pitfalls (Gotchas)](#173-common-pitfalls-gotchas)
   - [17.4 Rapid-Fire FAQ](#174-rapid-fire-faq)
   - [17.5 Top 25 Must-Know Topics (Study These First)](#175-top-25-must-know-topics-study-these-first)
+- [18. Coding Practice Problems](#18-coding-practice-problems)
+  - [18.1 Remove Duplicates, Count Frequencies, Reverse a List](#181-remove-duplicates-count-frequencies-reverse-a-list)
+  - [18.2 Small Utility Functions (clamp, flatten, chunk, merge)](#182-small-utility-functions-clamp-flatten-chunk-merge)
+  - [18.3 OOP Design: Payment System and User Service](#183-oop-design-payment-system-and-user-service)
 - [Appendix: Source Coverage Map](#appendix-source-coverage-map)
 
 ---
@@ -243,6 +253,9 @@ Bengaluru
 - **Q: When would you choose each?** — Sets for O(1) lookup/de-duplication, tuples for fixed data like coordinates or function return values, lists for ordered data that changes, dicts for lookup by key.
 - **Q: Is a tuple always immutable?** — The tuple itself is, but it can contain mutable objects: `t = ([1], 2); t[0].append(5)` works. Such a tuple is **not hashable**.
 - **Q: Are dicts ordered?** — Yes, insertion order is guaranteed from Python 3.7 (it was a CPython implementation detail in 3.6).
+- **Q: What set operations should you know?** *(theory notes)* — `a | b` union, `a & b` intersection, `a - b` difference, `a ^ b` symmetric difference (in one but not both). `{1,2,3} ^ {3,4,5}` → `{1, 2, 4, 5}`. `s.remove(x)` raises `KeyError` if `x` is missing; `s.discard(x)` doesn't.
+- **Q: Common list, tuple and dict methods?** *(theory notes)* — List: `append`, `insert(i, x)`, `remove(x)` (first match, `ValueError` if absent), `pop(i)` (default last), `index`, `count`, `sort`, `reverse`. Tuple: only `count` and `index`. Dict: `d.get(k, default)` (no `KeyError`), `d.pop(k)` (returns the value), `d.update(other)`, `d.keys()/values()/items()`.
+- **Q: How do you make a one-element tuple?** *(theory notes)* — With a trailing comma: `(5,)` is a tuple, `(5)` is just the int `5`. Unpacking: `x, y = (10, 20)`.
 
 **Key takeaway:** Ordered + mutable → list. Ordered + fixed → tuple. Unique + fast lookup → set. Key → value → dict.
 
@@ -459,6 +472,7 @@ True
 **Follow-ups:**
 - **Q: What's the pitfall with `x or default`?** — If `0` or `""` is a *valid* value, `or` will wrongly replace it. Use `default if x is None else x` in that case.
 - **Q: How do you make a custom object falsy?** — Define `__bool__` (or `__len__`).
+- **Q: What do `and` / `or` return?** *(theory notes)* — The **operand**, not necessarily `True`/`False`. `or` returns the first truthy value (or the last value); `and` returns the first falsy value (or the last value): `1 and 0 and 3` → `0`, `1 and 2 and 3` → `3`, `0 or "" or "x"` → `"x"`.
 
 **Key takeaway:** Empty or zero ⇒ falsy. Use `is None` when `0`/`""` are valid values.
 
@@ -790,6 +804,73 @@ cherry: ₹3.5
 
 ---
 
+### 1.12 String Methods and Slicing
+
+🟠 **P2** · Level: Easy · *(Source: python_theory.md — Day 8)*
+
+**Definition:** Strings are **immutable** sequences of characters, so every string method returns a **new** string (or a value) and never changes the original. Slicing `s[start:stop:step]` works on strings exactly as on lists.
+
+**Explanation:**
+
+| Group | Methods | Notes |
+|---|---|---|
+| Whitespace | `strip()`, `lstrip()`, `rstrip()` | Remove spaces/newlines (or given characters) from the ends |
+| Case | `upper()`, `lower()`, `title()`, `capitalize()`, `swapcase()` | `casefold()` for case-insensitive comparison |
+| Search | `find()`, `rfind()`, `index()`, `count()` | `find` returns `-1` if missing; `index` raises `ValueError` |
+| Check | `startswith()`, `endswith()`, `isdigit()`, `isalpha()`, `isalnum()`, `isspace()` | `startswith` accepts a **tuple** of options |
+| Split / join | `split(sep, maxsplit)`, `splitlines()`, `sep.join(iterable)` | `split()` with no argument splits on any whitespace |
+| Replace | `replace(old, new, count)` | `count` limits the number of replacements |
+| Padding | `zfill(n)`, `ljust(n)`, `rjust(n)`, `center(n, fill)` | Useful for aligned text output |
+
+```python
+s = "  Hello, World!  "
+print(repr(s.strip()), repr(s.lstrip()))
+print("a,b,c".split(","), "a,b,c,d".split(",", 2), "hello   world".split())
+print("-".join(["2024", "03", "15"]))
+print("Hello".replace("l", "L"), "Hello".replace("l", "L", 1))
+
+t = "Hello, World!"
+print(t.find("World"), t.find("xyz"), t.count("l"))
+try:
+    t.index("xyz")
+except ValueError as e:
+    print("ValueError:", e)
+print(t.startswith(("Hi", "Hello")), t.endswith("!"))
+print("hello123".isalnum(), "12345".isdigit(), "hello".isalpha(), "   ".isspace())
+print("hello world".title(), "hello".capitalize(), "Hello".swapcase())
+print("42".zfill(5), "hi".center(8, "*"), repr("hi".ljust(5)))
+
+p = "Python"
+print(p[0], p[-1], p[1:4], p[::2], p[::-1])
+```
+
+**Output:**
+```text
+'Hello, World!' 'Hello, World!  '
+['a', 'b', 'c'] ['a', 'b', 'c,d'] ['hello', 'world']
+2024-03-15
+HeLLo HeLlo
+7 -1 3
+ValueError: substring not found
+True True
+True True True True
+Hello World Hello hELLO
+00042 ***hi*** 'hi   '
+P n yth Pto nohtyP
+```
+
+**🎤 Say this in the interview:**
+> "Strings are immutable, so methods like `strip`, `replace` and `upper` always return a new string. The ones I use most are `split` and `join` — `join` is also the efficient way to build a string from many pieces — plus `strip`, `replace`, `startswith` and `find`. I remember that `find` returns -1 while `index` raises `ValueError`, and that `s[::-1]` reverses a string."
+
+**Follow-ups:**
+- **Q: Why use `"".join(parts)` instead of `+=` in a loop?** — Each `+=` creates a new string (strings are immutable), which can be O(n²); `join` builds the result once (see 11.2).
+- **Q: How do you check if a string is a palindrome?** — `s == s[::-1]` (normalise first, e.g. `s.lower()` and remove spaces).
+- **Q: `isdigit()` vs `isnumeric()`?** — Both are `True` for `"123"`; `isnumeric()` also accepts characters such as `"½"`. Neither accepts `"-5"` or `"3.14"` — use `int()`/`float()` inside `try` for that.
+
+**Key takeaway:** String methods return new strings. `split`/`join`, `strip`, `replace`, `find` vs `index`, and `[::-1]`.
+
+---
+
 ## 2. Standard Library Essentials
 
 ### 2.1 The `collections` Module (Counter, defaultdict, deque, namedtuple)
@@ -878,6 +959,34 @@ Coordinate(latitude=12.9716, longitude=77.5946, altitude=0.0)
 **Follow-ups:**
 - **Q: `NamedTuple` vs `dataclass`?** — `NamedTuple` is immutable and behaves like a tuple (indexing, unpacking). `@dataclass` is a regular class, mutable by default, with more features (defaults via `field`, `frozen`, `slots`). See 5.7.
 - **Q: Why not use a list as a queue?** — `list.pop(0)` is O(n); `deque.popleft()` is O(1).
+- **Q: Which extra `Counter` features are worth knowing?** *(theory notes)* — `most_common(n)`, `elements()` (repeats each key by its count), and arithmetic: `c1 + c2` adds counts, `c1 - c2` subtracts and drops zero/negative counts, `c1 & c2` keeps the minimum, `c1 | c2` the maximum. Anagram check: `Counter(a) == Counter(b)`.
+- **Q: Other `defaultdict` factories?** *(theory notes)* — `defaultdict(set)` collects unique values per key; `defaultdict(lambda: "N/A")` gives a custom default. `defaultdict(list)` is also the standard way to build a graph adjacency list.
+- **Q: What else can `deque` do?** *(theory notes)* — `rotate(n)` (`deque([1,2,3,4,5]).rotate(2)` → `[4, 5, 1, 2, 3]`), `appendleft`/`extendleft`, and `deque(maxlen=3)` keeps only the last 3 items — a ready-made sliding window. `popleft()` is O(1), which is why BFS uses a `deque` instead of `list.pop(0)` (O(n)).
+- **Q: Implement an LRU cache with `OrderedDict`.** *(theory notes)* — Move a key to the end on every access; evict from the front when over capacity:
+  ```python
+  from collections import OrderedDict
+
+  class LRUCache:
+      def __init__(self, capacity):
+          self.cache, self.capacity = OrderedDict(), capacity
+
+      def get(self, key):
+          if key not in self.cache:
+              return -1
+          self.cache.move_to_end(key)          # mark as most recently used
+          return self.cache[key]
+
+      def put(self, key, value):
+          if key in self.cache:
+              self.cache.move_to_end(key)
+          self.cache[key] = value
+          if len(self.cache) > self.capacity:
+              self.cache.popitem(last=False)   # evict least recently used
+
+  lru = LRUCache(2)
+  lru.put(1, "a"); lru.put(2, "b"); lru.get(1); lru.put(3, "c")
+  print(list(lru.cache.items()), lru.get(2))   # [(1, 'a'), (3, 'c')] -1
+  ```
 
 **Key takeaway:** Counting → `Counter`. Grouping → `defaultdict`. Queue → `deque`. Immutable record → `NamedTuple`.
 
@@ -937,6 +1046,9 @@ B [('B', 3), ('B', 4)]
 
 **🎤 Say this in the interview:**
 > "`itertools` gives lazy, memory-efficient iterator tools — `chain` to concatenate, `product`/`combinations`/`permutations` for combinatorics, `islice` to take items from any iterator, and `groupby` for grouping. The classic gotcha is that `groupby` only groups *consecutive* items, so you must sort by the key first."
+
+**Follow-ups:**
+- **Q: Which other `itertools` functions come up?** *(theory notes)* — `takewhile(pred, it)` yields items until `pred` is first false; `dropwhile(pred, it)` skips items until `pred` is first false, then yields the rest (`[1,3,5,2,7]` with "is odd" → `[1, 3, 5]` and `[2, 7]`). `compress(data, mask)` keeps items where the mask is truthy. `chain.from_iterable(nested)` flattens one level. `combinations_with_replacement(items, r)` allows repeats; `product([0, 1], repeat=3)` gives all 3-bit combinations. Infinite: `count(start, step)`, `cycle(it)`, `repeat(x, n)`.
 
 **Key takeaway:** `groupby` needs sorted input. `islice` is how you slice a generator.
 
@@ -1030,6 +1142,7 @@ def get_country_code(country_name: str) -> str:
 - **Q: Why can't you cache a function that takes a list?** — The cache is a dict keyed by arguments; lists are unhashable. Convert to a tuple.
 - **Q: Risks of `lru_cache`?** — Stale data if the source changes (call `cache_clear()`), unbounded memory with `maxsize=None`, and on methods it keeps `self` alive (can leak memory).
 - **Q: `cached_property` vs `property`?** — `property` recomputes on every access; `cached_property` computes once and stores the result in the instance `__dict__`.
+- **Q: Can `partial` pre-fill arguments of built-ins?** *(theory notes)* — Yes: `hex_to_int = partial(int, base=16)` → `hex_to_int("ff")` is `255`; `partial(int, base=2)("1010")` is `10`.
 
 **Key takeaway:** Pure + repeated + hashable args → `@lru_cache`.
 
@@ -1123,6 +1236,7 @@ city: Bengaluru
 **Follow-ups:**
 - **Q: What's a keyword-only argument?** — Any parameter after `*args` (or after a bare `*`) must be passed by name: `def f(a, *, b)`.
 - **Q: Positional-only?** — Parameters before `/` (Python 3.8+): `def f(a, /, b)` — `a` can't be passed as `a=1`.
+- **Q: How does a function return multiple values?** *(theory notes)* — It returns **one tuple**: `return min(xs), max(xs)` → `(1, 4)`, which the caller unpacks with `low, high = min_max(xs)`. A function with no `return` (or a bare `return`) returns `None`.
 
 **Key takeaway:** `*` → tuple of positionals. `**` → dict of keywords. Same symbols unpack at call time.
 
@@ -1232,6 +1346,7 @@ print(sorted(["bb", "a", "ccc"], key=lambda s: len(s)))
 **Follow-ups:**
 - **Q: Limitations of lambda?** — Single expression only, no statements, no annotations, and it shows as `<lambda>` in tracebacks. Don't assign a lambda to a name (PEP 8) — use `def`.
 - **Q: Why was `reduce` moved to `functools`?** — Explicit loops or built-ins (`sum`, `max`, `any`) are usually clearer.
+- **Q: Two less-known `map`/`filter` tricks?** *(theory notes)* — `filter(None, items)` keeps only truthy items (`[0, 1, None, 2, "", 3]` → `[1, 2, 3]`). `map` accepts several iterables and stops at the shortest: `map(lambda x, y: x + y, [1, 2, 3], [10, 20, 30])` → `[11, 22, 33]`.
 
 **Key takeaway:** Lambda = tiny anonymous function. Prefer comprehensions; `reduce` lives in `functools`.
 
@@ -1288,6 +1403,7 @@ UnboundLocalError: cannot access local variable 'counter' where it is not associ
 **Follow-ups:**
 - **Q: What happens if you read a global, then assign to it in the same function?** — `UnboundLocalError`, because the assignment makes the name local for the entire function body.
 - **Q: Is `global` good practice?** — Rarely. Prefer passing values and returning results, or using a class.
+- **Q: What is variable shadowing of built-ins?** *(theory notes)* — Naming a variable `list`, `dict`, `str`, `id`, `input`… hides the built-in in that scope: after `list = [1, 2, 3]`, calling `list("ab")` raises `TypeError: 'list' object is not callable`. Avoid built-in names (`del list` restores access).
 
 **Key takeaway:** LEGB for lookup; assignment makes a name local unless `global`/`nonlocal`.
 
@@ -1411,6 +1527,91 @@ xy
 
 ---
 
+### 3.7 Recursion
+
+🟠 **P2** · Level: Medium · *(Source: python_theory.md — Day 8)*
+
+**Definition:** A **recursive** function calls itself on a smaller version of the same problem. Every recursive function needs a **base case** (when to stop) and a **recursive case** (how to shrink the problem).
+
+**Explanation:**
+1. **Base case** — the simplest input, answered directly (`n <= 1`, empty list, `left > right`).
+2. **Recursive case** — break the problem down and call the function again on the smaller part.
+3. Each call adds a **stack frame**. CPython limits the depth (`sys.getrecursionlimit()`, default **1000**) and raises `RecursionError` beyond it. Python has **no tail-call optimisation**, so very deep recursion should be rewritten as a loop.
+4. Overlapping sub-problems (e.g., Fibonacci) make naive recursion exponential — fix with memoization (`@lru_cache`, see 2.3).
+
+```python
+import sys
+
+def factorial(n):
+    if n <= 1:                         # base case
+        return 1
+    return n * factorial(n - 1)        # recursive case
+
+def binary_search(arr, target, left=0, right=None):
+    if right is None:
+        right = len(arr) - 1
+    if left > right:                   # base case: not found
+        return -1
+    mid = (left + right) // 2
+    if arr[mid] == target:
+        return mid
+    if arr[mid] < target:
+        return binary_search(arr, target, mid + 1, right)
+    return binary_search(arr, target, left, mid - 1)
+
+def flatten(nested):
+    result = []
+    for item in nested:
+        if isinstance(item, list):
+            result.extend(flatten(item))   # recurse into the nested list
+        else:
+            result.append(item)
+    return result
+
+def fast_power(base, exp):             # O(log n) exponentiation
+    if exp == 0:
+        return 1
+    if exp % 2 == 0:
+        half = fast_power(base, exp // 2)
+        return half * half
+    return base * fast_power(base, exp - 1)
+
+def no_base_case(n):
+    return no_base_case(n - 1)         # never stops
+
+print(factorial(5))
+arr = [1, 3, 5, 7, 9, 11, 13]
+print(binary_search(arr, 7), binary_search(arr, 4))
+print(flatten([1, [2, [3, 4]], [5, 6], 7]))
+print(fast_power(2, 10))
+print(sys.getrecursionlimit())
+try:
+    no_base_case(10)
+except RecursionError as e:
+    print("RecursionError:", e)
+```
+
+**Output:**
+```text
+120
+3 -1
+[1, 2, 3, 4, 5, 6, 7]
+1024
+1000
+RecursionError: maximum recursion depth exceeded
+```
+
+**🎤 Say this in the interview:**
+> "Recursion solves a problem by calling the same function on a smaller input until it reaches a base case. It's natural for trees, nested data and divide-and-conquer like binary search. In Python I keep the depth limit in mind — about 1000 frames by default and no tail-call optimisation — so for deep inputs I use a loop or an explicit stack, and I add `@lru_cache` when sub-problems repeat, like Fibonacci."
+
+**Follow-ups:**
+- **Q: Should you just raise the limit with `sys.setrecursionlimit()`?** — Only carefully: a very high limit can crash the interpreter with a real C stack overflow. Prefer an iterative solution for deep inputs.
+- **Q: Recursion vs iteration?** — Recursion is clearer for recursive structures (trees, nested lists); iteration is faster in Python and has no depth limit.
+
+**Key takeaway:** Base case + smaller recursive call. Watch the ~1000-frame limit; memoize repeated sub-problems.
+
+---
+
 ## 4. Exception Handling
 
 ### 4.1 Exception Handling Best Practices
@@ -1485,6 +1686,7 @@ ValueError
 - **Q: Difference between `Exception` and `BaseException`?** — `BaseException` also includes `KeyboardInterrupt`, `SystemExit` and `GeneratorExit`. Catch `Exception` at most, never `BaseException` in normal code.
 - **Q: Why use `else`?** — It keeps the `try` block minimal, so you don't accidentally catch exceptions from code that shouldn't be protected.
 - **Q: EAFP vs LBYL?** — Python favours **EAFP** ("Easier to Ask Forgiveness than Permission": try it and catch the error) over **LBYL** ("Look Before You Leap": check first).
+- **Q: What does `raise ... from None` do, and what does a bare `raise` do?** *(theory notes)* — `raise NewError(...) from None` hides the original exception (sets `__suppress_context__`), giving a cleaner traceback. A bare `raise` inside `except` re-raises the **current** exception with its original traceback — use it after logging.
 
 **Key takeaway:** Specific `except`, never `pass`, cleanup in `finally`, custom exceptions for domain errors.
 
@@ -1540,6 +1742,8 @@ PyBank PyBank
 **Follow-ups:**
 - **Q: Is `__init__` a constructor?** — Loosely, yes. Strictly, `__new__` constructs the object and `__init__` initializes it.
 - **Q: Pitfall with class attributes?** — A mutable class attribute (e.g., `items = []`) is shared by all instances — same issue as mutable defaults.
+- **Q: What happens if you assign to a class attribute through an instance?** *(theory notes)* — `e1.company = "X"` creates a new **instance** attribute on `e1` that shadows the class attribute; other instances and `Employee.company` are unchanged. To change the shared value, assign on the class: `Employee.company = "X"`.
+- **Q: Is `self` a keyword?** *(theory notes)* — No, just a strong convention for the first parameter of instance methods. Any name works, but always use `self`.
 
 **Key takeaway:** Class = blueprint, object = instance, `__init__` = set up attributes.
 
@@ -1685,6 +1889,21 @@ Paying ₹500 via card
 - **Q: Does Python enforce private attributes?** — No. It's convention plus name mangling, not access control.
 - **Q: How do you inspect method resolution?** — `ClassName.__mro__` or `ClassName.mro()` (C3 linearization — see 5.3).
 - **Q: ABC vs Protocol?** — See 6.9: ABCs need explicit inheritance (nominal typing); Protocols match by structure.
+- **Q: How do you declare an abstract property?** *(theory notes)* — Stack `@property` on top of `@abstractmethod`; subclasses must define the property before they can be instantiated:
+  ```python
+  from abc import ABC, abstractmethod
+
+  class Vehicle(ABC):
+      @property
+      @abstractmethod
+      def fuel_type(self): ...
+
+  class EV(Vehicle):
+      @property
+      def fuel_type(self): return "Electric"
+
+  print(EV().fuel_type)   # Electric
+  ```
 
 **Key takeaway:** Inheritance (`super()`), polymorphism (duck typing), encapsulation (conventions), abstraction (ABCs).
 
@@ -2009,6 +2228,11 @@ FrozenInstanceError
 **🎤 Say this in the interview:**
 > "`@dataclass` generates `__init__`, `__repr__` and `__eq__` from type-annotated fields, so data-holding classes need far less boilerplate. I use `field(default_factory=list)` for mutable defaults, `frozen=True` for immutable, hashable value objects, and `__post_init__` for validation. If I need runtime validation of external input, I use Pydantic instead."
 
+**Follow-ups:**
+- **Q: What options does `field()` take?** *(theory notes)* — `default_factory=list` for mutable defaults; `init=False` (not an `__init__` argument — set it in `__post_init__`); `repr=False` (hidden from `repr`, e.g. secrets); `compare=False` (ignored by `==` and ordering, e.g. timestamps).
+- **Q: How do you "change" a frozen or immutable-style dataclass?** *(theory notes)* — `dataclasses.replace(obj, price=70000.0)` returns a **new** instance with the given fields changed.
+- **Q: How do you serialise a dataclass?** — `asdict(obj)` (recursive, handles nested dataclasses) or `astuple(obj)`, then `json.dumps(asdict(obj))`.
+
 **Key takeaway:** Data-holding class → `@dataclass`; immutable → `frozen=True`; validated input → Pydantic.
 
 ---
@@ -2142,6 +2366,7 @@ True
 
 **Follow-ups:**
 - **Q: What should `__add__` return for an unsupported type?** — `NotImplemented` (not raise), so Python can try the other operand's `__radd__`.
+- **Q: What is `__del__`?** *(theory notes)* — A finaliser called when the object is about to be destroyed (in CPython, when its reference count reaches zero). `del x` only removes **one name** — `__del__` runs when the **last** reference is gone, and the timing isn't guaranteed (reference cycles, interpreter shutdown). Never rely on it to release resources — use a context manager (8.5).
 
 **Key takeaway:** Dunder methods = operator/built-in hooks that make objects feel native.
 
@@ -3220,6 +3445,7 @@ continued safely
 
 **Follow-ups:**
 - **Q: Async version?** — `async with`, implemented with `__aenter__`/`__aexit__` or `@contextlib.asynccontextmanager` (e.g., DB sessions in FastAPI).
+- **Q: How do you use several context managers, or one only sometimes?** *(theory notes)* — Several: `with open("in.txt") as src, open("out.txt", "w") as dst:` (wrap them in parentheses across lines in Python 3.10+). Optional: `contextlib.nullcontext()` is a do-nothing context manager — `with (lock if lock is not None else nullcontext()):` keeps one code path whether or not a lock was passed.
 
 **Key takeaway:** `with` = guaranteed cleanup. `@contextmanager` + `try/finally` for quick ones.
 
@@ -3487,6 +3713,11 @@ if __name__ == "__main__":
 **🎤 Say this in the interview:**
 > "`concurrent.futures` gives one API for thread and process pools. I use `ThreadPoolExecutor` for I/O-bound tasks like HTTP calls and `ProcessPoolExecutor` for CPU-bound tasks because it sidesteps the GIL. `map` keeps input order; `submit` returns Futures, and `as_completed` lets me handle results as soon as each one finishes."
 
+**Follow-ups:**
+- **Q: What can you do with a `Future`?** *(theory notes)* — `done()` (finished?), `result(timeout)` (blocks; re-raises the task's exception), `exception()`, `cancel()` (only succeeds if it hasn't started), and `add_done_callback(fn)` (runs `fn(future)` when it completes).
+- **Q: How do you wait for the first result only?** *(theory notes)* — `done, not_done = wait(futures, return_when=FIRST_COMPLETED)` (or `ALL_COMPLETED`, `FIRST_EXCEPTION`).
+- **Q: Why use the executor as a context manager?** *(theory notes)* — Leaving the `with` block calls `executor.shutdown(wait=True)`; otherwise you must call `shutdown()` yourself. Typical `max_workers`: threads → 5–20+ for I/O; processes → `os.cpu_count()`.
+
 **Key takeaway:** Threads pool for I/O, process pool for CPU; `map` = ordered, `as_completed` = fastest-first.
 
 ---
@@ -3725,6 +3956,174 @@ True
 
 ---
 
+### 10.8 Thread Synchronization: Lock, RLock, Semaphore and Daemon Threads
+
+🟠 **P2** · Level: Medium · *(Source: python_theory.md — Day 5)*
+
+**Definition:** When threads share data, a **race condition** happens if the result depends on which thread runs first. Synchronization primitives control access: a **`Lock`** lets one thread in at a time, an **`RLock`** can be re-acquired by the thread that already holds it, and a **`Semaphore`** allows up to *N* threads at once. A **daemon** thread is killed automatically when the main program exits.
+
+**Explanation:**
+- `counter += 1` is **not atomic** — it is read → add → write, and a thread switch in between loses updates. The GIL does not prevent this (see 10.1).
+- **`Lock`** — `with lock:` acquires and always releases, even on an exception.
+- **`RLock`** (reentrant lock) — needed when the same thread may lock again, e.g. a recursive function or one locked method calling another. A plain `Lock` would **deadlock** itself.
+- **`Semaphore(n)`** — limits concurrent access to a resource (connection slots, API calls).
+- **Deadlock** — two threads each hold a lock the other needs. Prevent it by always acquiring locks in the **same order**, using `lock.acquire(timeout=...)`, or avoiding shared state (pass data through a `queue.Queue`).
+- **Daemon threads** (`daemon=True`) don't keep the program alive — fine for background helpers, but they're stopped abruptly, so never use them for work that must finish (like writing files). Non-daemon threads (the default) are waited for.
+- `queue.Queue` is the thread-safe way to pass work between threads (producer–consumer); a `None` **sentinel** tells consumers to stop.
+
+```python
+import threading
+import time
+
+# Lock: protect a shared counter (counter += 1 is read-modify-write, not atomic)
+counter = 0
+lock = threading.Lock()
+
+def increment():
+    global counter
+    for _ in range(100_000):
+        with lock:                     # only one thread at a time in this block
+            counter += 1
+
+threads = [threading.Thread(target=increment) for _ in range(5)]
+for t in threads: t.start()
+for t in threads: t.join()
+print(counter)
+
+# RLock: the SAME thread may acquire it again (a plain Lock would deadlock here)
+rlock = threading.RLock()
+
+def depth(n):
+    with rlock:
+        return 0 if n == 0 else 1 + depth(n - 1)
+
+print(depth(3))
+
+# Semaphore: at most 3 threads inside the block at once
+sem = threading.Semaphore(3)
+active = peak = 0
+stats_lock = threading.Lock()
+
+def use_resource():
+    global active, peak
+    with sem:
+        with stats_lock:
+            active += 1
+            peak = max(peak, active)
+        time.sleep(0.05)
+        with stats_lock:
+            active -= 1
+
+workers = [threading.Thread(target=use_resource) for _ in range(7)]
+for t in workers: t.start()
+for t in workers: t.join()
+print(peak)
+
+# Daemon thread: does not keep the program alive
+background = threading.Thread(target=time.sleep, args=(10,), daemon=True)
+background.start()
+print(background.daemon)               # program exits now without waiting 10 s
+```
+
+**Output:**
+```text
+500000
+3
+3
+True
+```
+
+**🎤 Say this in the interview:**
+> "A race condition happens when threads update shared state without coordination — even `counter += 1` isn't atomic, and the GIL doesn't protect it. I guard shared state with a `Lock` in a `with` block, use an `RLock` when the same thread may need the lock again, and a `Semaphore` to cap how many threads use a resource at once. To avoid deadlocks I acquire locks in a fixed order or avoid shared state by passing work through a `queue.Queue`. Daemon threads are for background helpers that may be killed when the program exits."
+
+**Follow-ups:**
+- **Q: How does multiprocessing share data?** — Processes don't share memory by default. Use `multiprocessing.Queue`/`Pipe`, shared values like `Value('i', 0)` / `Array` (with a `multiprocessing.Lock`), or a `Manager`.
+- **Q: Why is `if __name__ == "__main__":` needed with multiprocessing?** — On Windows/macOS ("spawn"), each child re-imports the main module; without the guard it would start processes recursively (see 10.3).
+
+**Key takeaway:** Shared mutable state → `Lock` (re-entry → `RLock`, limit N → `Semaphore`). Fixed lock order prevents deadlocks.
+
+---
+
+### 10.9 More asyncio Patterns (Error Handling, Async Generators, Rate Limiting)
+
+🟠 **P2** · Level: Hard · *(Source: python_theory.md — Day 5)*
+
+**Definition:** Beyond `await` and `gather` (10.5), real async code needs to **handle partial failures**, **stream** values with async generators, and **limit concurrency** so it doesn't overload a server.
+
+**Explanation:**
+
+| Tool | What it does |
+|---|---|
+| `asyncio.gather(*aws)` | Runs concurrently, returns results **in input order**; by default the first exception propagates to the caller |
+| `gather(..., return_exceptions=True)` | Exceptions are **returned as values** in the result list, so one failure doesn't lose the other results |
+| `asyncio.create_task(coro)` | Schedules a coroutine **now** and returns a `Task`; `await` it later (keep a reference to it) |
+| `asyncio.as_completed(aws)` | Yields results in **completion order** |
+| `async def` + `yield` | **Async generator**, consumed with `async for` (e.g. streaming rows or pages) |
+| `__aenter__` / `__aexit__` | **Async context manager**, used with `async with` (DB connections, HTTP sessions) |
+| `asyncio.Semaphore(n)` | At most *n* coroutines inside `async with sem:` — client-side rate limiting |
+
+```python
+import asyncio
+
+async def risky(name, fail=False):
+    await asyncio.sleep(0.01)
+    if fail:
+        raise ValueError(f"{name} failed")
+    return f"{name} ok"
+
+async def ticks(n):                     # async generator: async def + yield
+    for i in range(n):
+        await asyncio.sleep(0)
+        yield i
+
+async def limited(i, sem, stats):
+    async with sem:                     # at most 2 coroutines in here at once
+        stats["active"] += 1
+        stats["peak"] = max(stats["peak"], stats["active"])
+        await asyncio.sleep(0.01)
+        stats["active"] -= 1
+        return i
+
+async def main():
+    # 1. return_exceptions=True: one failure doesn't lose the other results
+    results = await asyncio.gather(risky("A"), risky("B", fail=True), risky("C"),
+                                   return_exceptions=True)
+    print(results)
+
+    # 2. async for over an async generator
+    print([i async for i in ticks(3)])
+
+    # 3. asyncio.Semaphore limits concurrency (e.g., max N calls to an API)
+    sem = asyncio.Semaphore(2)
+    stats = {"active": 0, "peak": 0}
+    print(await asyncio.gather(*(limited(i, sem, stats) for i in range(5))), stats["peak"])
+
+    # 4. create_task starts work now; await it later
+    task = asyncio.create_task(risky("background"))
+    print(await task)
+
+asyncio.run(main())
+```
+
+**Output:**
+```text
+['A ok', ValueError('B failed'), 'C ok']
+[0, 1, 2]
+[0, 1, 2, 3, 4] 2
+background ok
+```
+
+**🎤 Say this in the interview:**
+> "With `gather` I pass `return_exceptions=True` when I call many APIs, so one failure doesn't throw away the other results — then I check which items are exceptions. I use `create_task` to start work in the background and `as_completed` to handle results as they arrive. For streaming I write async generators consumed with `async for`, and I cap concurrency with an `asyncio.Semaphore` so I don't hammer a downstream service. For flaky calls I wrap them in a retry loop with exponential backoff using `asyncio.sleep`."
+
+**Follow-ups:**
+- **Q: How do you retry an async call?** — Loop over attempts, catch the transient errors, `await asyncio.sleep(2 ** (attempt - 1))` (exponential backoff), and re-raise after the last attempt.
+- **Q: How do you add a timeout?** — `await asyncio.wait_for(coro, timeout=5)`, or `async with asyncio.timeout(5):` (Python 3.11+).
+
+**Key takeaway:** `return_exceptions=True` for partial failures, `async for` for streams, `Semaphore` to limit concurrency.
+
+---
+
 ## 11. Performance & Optimization
 
 ### 11.1 Profiling Python Code
@@ -3924,6 +4323,11 @@ async def create_user(user: UserCreate):
 **🎤 Say this in the interview:**
 > "I define request and response shapes as Pydantic models. FastAPI validates the incoming JSON against them and returns a 422 with details if it's invalid, then uses the response model to serialize the output and filter out fields like passwords. In Pydantic v2 I use `field_validator` for custom rules and `model_dump` instead of `.dict()`. I always keep separate create and output schemas."
 
+**Follow-ups:**
+- **Q: How do you validate one field against another?** *(theory notes)* — `@model_validator(mode="after")` runs after all fields are validated, e.g. checking `password == confirm_password` and raising `ValueError` (returned as a 422).
+- **Q: How do you return SQLAlchemy ORM objects through a Pydantic model?** *(theory notes)* — Set `model_config = {"from_attributes": True}` (v1: `orm_mode = True`), so the model reads attributes instead of dict keys.
+- **Q: Which `Field` constraints exist?** *(theory notes)* — `gt`/`ge`/`lt`/`le` for numbers, `min_length`/`max_length`, `pattern` (regex), plus `default`, `description` and `examples` for the docs.
+
 **Key takeaway:** Pydantic = runtime validation from type hints; separate in/out schemas.
 
 ---
@@ -4008,6 +4412,9 @@ async def get_item(item_id: int):
 **🎤 Say this in the interview:**
 > "For simple cases I raise `HTTPException` with a status code. For domain errors I define custom exceptions and register handlers with `@app.exception_handler`, so the business code stays HTTP-agnostic and every error has the same JSON shape. I never expose raw exception messages or stack traces to clients — I log them and return a clean error."
 
+**Follow-ups:**
+- **Q: How do you customise FastAPI's default 422 validation response?** *(theory notes)* — Register a handler for `RequestValidationError` and build your own body from `exc.errors()` (each error has `loc`, `msg` and `type`). A catch-all `@app.exception_handler(Exception)` returns a generic 500 and logs the details, so internals never leak to the client.
+
 **Key takeaway:** `HTTPException` for simple cases; custom exception + handler for consistent error schemas.
 
 ---
@@ -4048,6 +4455,9 @@ app.add_middleware(
 
 **🎤 Say this in the interview:**
 > "Middleware wraps every request and response, so it's where I put cross-cutting concerns like request timing, logging, CORS and rate limiting. The last middleware added is the outermost and runs first. CORS tells browsers which origins may call my API; in production I list exact origins, because a wildcard combined with credentials is rejected by browsers and is a security risk."
+
+**Follow-ups:**
+- **Q: What other built-in middleware is there?** *(theory notes)* — `GZipMiddleware(minimum_size=1000)` compresses large responses; `TrustedHostMiddleware(allowed_hosts=[...])` rejects requests with unexpected `Host` headers. Function-style middleware uses `@app.middleware("http")`; reusable class-style middleware subclasses Starlette's `BaseHTTPMiddleware` and is added with `app.add_middleware(...)`.
 
 **Key takeaway:** Middleware = per-request cross-cutting logic. CORS = explicit origins in prod.
 
@@ -4166,6 +4576,7 @@ async def protected_route(user: str = Depends(get_current_user)):
 **Follow-ups:**
 - **Q: How do you log out / revoke a JWT?** — JWTs are stateless, so use short expiry plus a server-side denylist (e.g., in Redis) or rotate refresh tokens.
 - **Q: How are passwords stored?** — Hashed with bcrypt/argon2 (e.g., `passlib`/`pwdlib`), never stored as plain text or encrypted.
+- **Q: How do you restrict an endpoint to admins?** *(theory notes)* — Chain dependencies: a `require_admin` dependency depends on `get_current_user` and raises **403 Forbidden** if the role doesn't match (401 = not authenticated, 403 = authenticated but not allowed). Apply it per route or to a whole router with `dependencies=[Depends(require_admin)]`.
 
 **Key takeaway:** Signed, short-lived, no secrets in the payload, verified in a dependency.
 
@@ -4430,6 +4841,164 @@ async def info(settings: Settings = Depends(get_settings)):
 > "I never hardcode config or secrets. I use `pydantic-settings`, which reads environment variables or a `.env` file into a typed Settings class, so a missing or invalid value fails at startup instead of at runtime. I wrap it in an `lru_cache` factory so it's loaded once, and inject it with `Depends` so tests can override it. `.env` stays out of git."
 
 **Key takeaway:** Env vars + typed `BaseSettings` + `@lru_cache` factory.
+
+---
+
+### 12.14 FastAPI Fundamentals: Routes, Parameters, HTTP Methods and the Request Lifecycle
+
+🔴 **P1** · Level: Easy–Medium · *(Source: python_theory.md — Day 6)*
+
+**Definition:** A FastAPI **route** maps an HTTP method + path to a function. FastAPI reads each function parameter's **type hint and default** to decide where the value comes from (path, query string, body, header or cookie), validates it, and returns **422** if it's invalid.
+
+**Explanation — the request lifecycle:**
+1. **Uvicorn** (ASGI server) receives the HTTP request.
+2. **Middleware** runs (outermost first).
+3. The **router** matches the method and path.
+4. **Dependencies** (`Depends`) are resolved.
+5. Path/query/body/header/cookie values are **parsed and validated** by Pydantic.
+6. Your **handler** runs.
+7. The return value is **serialised** (filtered by `response_model`) to JSON.
+8. Middleware runs again in **reverse order** on the response.
+
+| Where the value comes from | How to declare it |
+|---|---|
+| **Path** `/items/{item_id}` | Parameter with the same name: `item_id: int` |
+| **Query** `?verbose=true` | Simple-type parameter with a default: `verbose: bool = False` |
+| **Body** (JSON) | Pydantic model parameter: `item: ItemIn` |
+| **Header** `X-Request-Id` | `x_request_id: str \| None = Header(None)` (underscores → hyphens) |
+| **Cookie** | `session: str \| None = Cookie(None)` |
+| Raw request | `request: Request` (method, URL, headers, client IP, `await request.body()`) |
+
+| Method | Meaning | Typical status |
+|---|---|---|
+| `GET` | Read | 200 |
+| `POST` | Create | 201 |
+| `PUT` | **Full replace** — client sends the whole resource | 200 |
+| `PATCH` | **Partial update** — only the fields to change | 200 |
+| `DELETE` | Delete | 200 or 204 |
+
+```python
+from fastapi import FastAPI, Header, Cookie, Request, Depends, HTTPException, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.testclient import TestClient
+from pydantic import BaseModel, Field, model_validator
+
+app = FastAPI()
+app.add_middleware(GZipMiddleware, minimum_size=1000)                # compress big responses
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["testserver", "localhost"])
+
+items = {1: {"name": "Laptop", "price": 75000.0, "in_stock": True}}
+
+class ItemIn(BaseModel):            # PUT: every field required (full replacement)
+    name: str
+    price: float = Field(gt=0)
+    in_stock: bool = True
+
+class ItemPatch(BaseModel):         # PATCH: every field optional (partial update)
+    name: str | None = None
+    price: float | None = Field(default=None, gt=0)
+    in_stock: bool | None = None
+
+class ItemOut(BaseModel):
+    id: int
+    name: str
+    price: float
+
+class Signup(BaseModel):
+    password: str
+    confirm_password: str
+
+    @model_validator(mode="after")          # cross-field validation
+    def passwords_match(self):
+        if self.password != self.confirm_password:
+            raise ValueError("Passwords do not match")
+        return self
+
+@app.exception_handler(RequestValidationError)
+async def validation_handler(request: Request, exc: RequestValidationError):
+    errors = [{"field": ".".join(str(p) for p in e["loc"]), "message": e["msg"]} for e in exc.errors()]
+    return JSONResponse(status_code=422, content={"success": False, "errors": errors})
+
+@app.get("/items/{item_id}", response_model=ItemOut)            # path param, validated as int
+async def get_item(item_id: int,
+                   verbose: bool = False,                       # query param ?verbose=true
+                   x_request_id: str | None = Header(None),     # header X-Request-Id
+                   session: str | None = Cookie(None)):         # cookie "session"
+    if item_id not in items:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return {"id": item_id, **items[item_id]}                    # in_stock filtered by ItemOut
+
+@app.put("/items/{item_id}", response_model=ItemOut)
+async def replace_item(item_id: int, item: ItemIn):
+    items[item_id] = item.model_dump()
+    return {"id": item_id, **items[item_id]}
+
+@app.patch("/items/{item_id}", response_model=ItemOut)
+async def update_item(item_id: int, changes: ItemPatch):
+    items[item_id].update(changes.model_dump(exclude_unset=True))   # only fields the client sent
+    return {"id": item_id, **items[item_id]}
+
+@app.get("/inspect")
+async def inspect(request: Request):
+    return {"method": request.method, "path": request.url.path, "query": dict(request.query_params)}
+
+@app.post("/signup", status_code=status.HTTP_201_CREATED)
+async def signup(data: Signup):
+    return {"ok": True}
+
+@app.get("/old-docs")
+async def old_docs():
+    return RedirectResponse(url="/docs", status_code=301)
+
+def get_current_user(x_role: str = Header("viewer")):          # stand-in for JWT decoding (12.7)
+    return {"name": "raj", "role": x_role}
+
+def require_admin(user: dict = Depends(get_current_user)):
+    if user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return user
+
+@app.delete("/admin/items/{item_id}")
+async def admin_delete(item_id: int, admin: dict = Depends(require_admin)):
+    return {"deleted": item_id, "by": admin["name"]}
+
+client = TestClient(app)
+print(client.get("/items/1").json())
+print(client.get("/items/abc").status_code, client.get("/items/abc").json()["errors"][0]["field"])
+print(client.patch("/items/1", json={"price": 70000}).json())
+print(client.put("/items/1", json={"name": "Phone"}).status_code)          # PUT needs all required fields
+print(client.get("/inspect?q=x").json())
+print(client.post("/signup", json={"password": "a", "confirm_password": "b"}).json()["errors"][0]["message"])
+print(client.get("/old-docs", follow_redirects=False).status_code)
+print(client.delete("/admin/items/1").status_code, client.delete("/admin/items/1", headers={"X-Role": "admin"}).json())
+```
+
+**Output** (run with FastAPI 0.115 / Pydantic 2):
+```text
+{'id': 1, 'name': 'Laptop', 'price': 75000.0}
+422 path.item_id
+{'id': 1, 'name': 'Laptop', 'price': 70000.0}
+422
+{'method': 'GET', 'path': '/inspect', 'query': {'q': 'x'}}
+Value error, Passwords do not match
+301
+403 {'deleted': 1, 'by': 'raj'}
+```
+
+> Run the app with `uvicorn main:app --reload` (`main` = file name, `app` = the FastAPI object, `--reload` = restart on code changes). Interactive docs are served at `/docs` (Swagger UI) and `/redoc`. Other response classes: `HTMLResponse`, `PlainTextResponse`, `StreamingResponse` (large or streamed data, e.g. server-sent events) and `FileResponse`.
+
+**🎤 Say this in the interview:**
+> "A request goes through Uvicorn, then the middleware stack, the router, dependency resolution and Pydantic validation before my handler runs; the result is serialised through the `response_model`, which also filters out fields I don't want to expose. FastAPI decides where each parameter comes from by its declaration — path placeholders, simple types as query parameters, Pydantic models as the JSON body, and `Header`/`Cookie` for the rest — and returns 422 on invalid input. For updates, PUT replaces the whole resource while PATCH sends only the changed fields, which I apply with `model_dump(exclude_unset=True)`."
+
+**Follow-ups:**
+- **Q: Why `exclude_unset=True` for PATCH?** — It returns only the fields the client actually sent, so fields they left out aren't overwritten with defaults or `None`. (`exclude_none=True` drops fields whose value is `None`, which also prevents a client from explicitly clearing a field.)
+- **Q: What does `response_model` do?** — Validates and **filters** the response (extra fields such as `in_stock` or a password hash are removed) and documents the schema in `/docs`.
+- **Q: Which status code for a validation error vs a missing resource?** — 422 for invalid input (automatic), 404 for a missing resource (raise `HTTPException`), 401 unauthenticated, 403 forbidden.
+
+**Key takeaway:** Path = `{name}`, query = simple type with default, body = Pydantic model. PUT replaces, PATCH updates (`exclude_unset=True`).
 
 ---
 
@@ -5498,6 +6067,198 @@ Result:    Response time dropped from 3400 ms to 85 ms (40× faster)
 
 ---
 
+## 18. Coding Practice Problems
+
+> Hands-on exercises from `python_theory.md` (Days 1–3). Practise writing them without looking, then compare.
+
+### 18.1 Remove Duplicates, Count Frequencies, Reverse a List
+
+🔴 **P1** · Level: Easy · *(Source: python_theory.md — Day 1)*
+
+**Definition:** Three warm-up problems that test whether you know the idiomatic tools: `dict.fromkeys`/`set` for de-duplication, `dict.get`/`Counter` for counting, and slicing/`reversed`/two pointers for reversing.
+
+```python
+from collections import Counter
+
+nums = [3, 1, 3, 2, 1, 4]
+print(list(dict.fromkeys(nums)))                 # remove duplicates, keep order
+seen = set()
+print([x for x in nums if not (x in seen or seen.add(x))])
+print(sorted(set(nums)))                         # set() loses order -> sort if needed
+
+words = ["apple", "banana", "apple", "cherry", "banana", "apple"]
+freq = {}
+for w in words:
+    freq[w] = freq.get(w, 0) + 1
+print(freq)
+print(Counter(words).most_common(2))
+
+lst = [1, 2, 3, 4, 5]
+print(lst[::-1], list(reversed(lst)))
+def reverse_in_place(a):
+    left, right = 0, len(a) - 1
+    while left < right:
+        a[left], a[right] = a[right], a[left]
+        left += 1
+        right -= 1
+    return a
+print(reverse_in_place([1, 2, 3, 4, 5]))
+```
+
+**Output:**
+```text
+[3, 1, 2, 4]
+[3, 1, 2, 4]
+[1, 2, 3, 4]
+{'apple': 3, 'banana': 2, 'cherry': 1}
+[('apple', 3), ('banana', 2)]
+[5, 4, 3, 2, 1] [5, 4, 3, 2, 1]
+[5, 4, 3, 2, 1]
+```
+
+**🎤 Say this in the interview:**
+> "To remove duplicates while keeping order I use `list(dict.fromkeys(items))`, because dicts keep insertion order; `set()` is faster to write but loses order. For counting I use `Counter` and `most_common`. To reverse, `[::-1]` returns a new list, `reversed()` returns an iterator, `.reverse()` works in place, and the two-pointer swap is what they want if built-ins aren't allowed."
+
+**Key takeaway:** Ordered de-dup → `dict.fromkeys`. Counting → `Counter`. Reverse → `[::-1]` (new) or `.reverse()` (in place).
+
+---
+
+### 18.2 Small Utility Functions (clamp, flatten, chunk, merge)
+
+🟢 **P3** · Level: Easy · *(Source: python_theory.md — Day 2)*
+
+```python
+def clamp(value, low, high):
+    return max(low, min(value, high))
+
+def flatten_once(nested):
+    return [item for sub in nested for item in sub]
+
+def chunk(items, size):
+    return [items[i:i + size] for i in range(0, len(items), size)]
+
+def merge_dicts(*dicts):
+    result = {}
+    for d in dicts:
+        result.update(d)                 # later dicts win
+    return result
+
+print(clamp(15, 0, 10), clamp(-5, 0, 10))
+print(flatten_once([[1, 2], [3, 4], [5]]))
+print(chunk([1, 2, 3, 4, 5, 6, 7], 3))
+print(merge_dicts({"a": 1}, {"b": 2}, {"a": 99}))
+```
+
+**Output:**
+```text
+10 0
+[1, 2, 3, 4, 5]
+[[1, 2, 3], [4, 5, 6], [7]]
+{'a': 99, 'b': 2}
+```
+
+**Follow-ups:**
+- **Q: Other ways to merge dicts?** — `{**a, **b}` or `a | b` (Python 3.9+); in both, later keys win.
+- **Q: How do you flatten arbitrarily deep nesting?** — Recursion (3.7) or a generator with `yield from` (8.2).
+
+**Key takeaway:** Comprehensions + slicing solve most small utility problems in one line.
+
+---
+
+### 18.3 OOP Design: Payment System and User Service
+
+🟠 **P2** · Level: Medium · *(Source: python_theory.md — Day 3)*
+
+**Definition:** A common design exercise: model several payment types behind **one interface**, using an abstract base class (abstraction), subclasses (inheritance), the same `process()` call for every type (polymorphism), and private/read-only attributes (encapsulation).
+
+```python
+from abc import ABC, abstractmethod
+import uuid
+
+class Payment(ABC):
+    def __init__(self, amount):
+        if amount <= 0:
+            raise ValueError("Amount must be positive")
+        self._amount = amount
+        self.txn_id = uuid.uuid4().hex[:8].upper()
+        self.status = "PENDING"
+
+    @property
+    def amount(self):                       # read-only from outside
+        return self._amount
+
+    @abstractmethod
+    def process(self): ...                  # every payment type must implement
+
+    def refund(self):                       # shared behaviour
+        if self.status != "SUCCESS":
+            return "Cannot refund: payment not successful"
+        self.status = "REFUNDED"
+        return f"Refunded {self.amount}"
+
+class CardPayment(Payment):
+    def __init__(self, amount, card_number):
+        super().__init__(amount)
+        self.__card = card_number           # name-mangled ("private")
+
+    def process(self):
+        self.status = "SUCCESS" if len(self.__card) == 16 else "FAILED"
+        return f"Card ****{self.__card[-4:]}: {self.status}"
+
+class UPIPayment(Payment):
+    def __init__(self, amount, upi_id):
+        super().__init__(amount)
+        self.upi_id = upi_id
+
+    def process(self):
+        self.status = "SUCCESS" if "@" in self.upi_id else "FAILED"
+        return f"UPI {self.upi_id}: {self.status}"
+
+class PaymentGateway:
+    def __init__(self):
+        self._history = []
+
+    def pay(self, payment: Payment):        # polymorphism: any Payment works
+        result = payment.process()
+        self._history.append(payment)
+        return result
+
+    def total_collected(self):
+        return sum(p.amount for p in self._history if p.status == "SUCCESS")
+
+gateway = PaymentGateway()
+print(gateway.pay(CardPayment(5000, "1234567890123456")))
+upi = UPIPayment(1500, "raj@upi")
+print(gateway.pay(upi))
+print(gateway.pay(UPIPayment(800, "invalid-id")))
+print(upi.refund())
+print(gateway.total_collected())
+```
+
+**Output:**
+```text
+Card ****3456: SUCCESS
+UPI raj@upi: SUCCESS
+UPI invalid-id: FAILED
+Refunded 1500
+5000
+```
+
+**The user-service variant** (same principles, from the theory notes):
+- `Enum` for fixed choices — `class Role(Enum): ADMIN = "admin"; EDITOR = "editor"; VIEWER = "viewer"` — instead of raw strings, so typos fail loudly.
+- A `BaseUser` with validation in `@staticmethod` helpers (email, password length), a hashed password in a name-mangled attribute, and an `email` `@property` whose setter re-validates.
+- Subclasses `AdminUser` (ban/unban users) and `EditorUser` (create posts) extend the base with `super().__init__()`.
+- A **value object** `Address` composed into the user (composition, see 5.4) with `__eq__` comparing its fields.
+- A `UserService` that stores users in a dict and implements `__len__` and `__contains__`, so `len(service)` and `"alice" in service` work; a `_user_count` class attribute read through a `@classmethod`.
+- `__eq__` + `__hash__` based on the user id, so users can be put in sets (see 6.3).
+
+**🎤 Say this in the interview:**
+> "I'd start with an abstract `Payment` class that defines `process` as the contract and holds shared logic like validation, the read-only amount and refunds. Each payment type implements `process` its own way, and a gateway works with any `Payment` without checking its type — that's polymorphism. Sensitive data such as the card number stays private, and adding a new payment method means adding one subclass without touching the gateway — the open/closed principle."
+
+**Key takeaway:** ABC for the contract, subclasses for each variant, one gateway that relies on polymorphism, and private state behind properties.
+
+---
+
 ## Appendix: Source Coverage Map
 
 Every question from both source files and where it lives in this guide. Duplicates were merged into one section.
@@ -5577,6 +6338,39 @@ These changes keep the original meaning but fix code that was outdated or would 
 | Q90 (14.4) | `[coverage:run]` sections in `.coveragerc` | `[run]`/`[report]` (the prefixed form is for `setup.cfg`/`tox.ini`) |
 | Q96 (15.4) | Missing `Depends`/`time` imports; sync Redis inside async | Imports added; async cache client; 301 vs 302 trade-off kept |
 | Q68 (7.3) | Cited `@app.on_event` | Noted it's deprecated in favour of `lifespan` |
+
+### Additions from `python_theory.md`
+
+The third source file was compared against this guide topic by topic. Only content that was **missing** was added; topics it shared with Q1–Q100 were already covered here, usually in more depth.
+
+| Added | Where |
+|---|---|
+| String methods and slicing | 1.12 (new) |
+| Set operations; list/tuple/dict methods; one-element tuple | 1.1 follow-ups |
+| `and`/`or` return the operand | 1.5 follow-up |
+| `Counter` arithmetic/`elements`, `defaultdict(set)`, `deque.rotate`/`maxlen`, LRU cache with `OrderedDict` | 2.1 follow-ups |
+| `takewhile`, `dropwhile`, `compress`, `chain.from_iterable`, `combinations_with_replacement`, `count`/`cycle`/`repeat` | 2.2 follow-ups |
+| `partial` with built-ins (`int(base=16)`) | 2.3 follow-up |
+| Returning multiple values / implicit `None` | 3.1 follow-up |
+| `filter(None, ...)`, `map` over several iterables | 3.3 follow-up |
+| Shadowing built-in names | 3.4 follow-up |
+| Recursion | 3.7 (new) |
+| `raise ... from None`, bare `raise` | 4.1 follow-up |
+| Class attribute assigned via an instance; `self` is a convention | 5.1 follow-ups |
+| Abstract property | 5.2 follow-up |
+| Dataclass `field()` options, `dataclasses.replace`, `asdict` | 5.7 follow-ups |
+| `__del__` finaliser | 6.1 follow-up |
+| Multiple context managers, `nullcontext` | 8.5 follow-up |
+| `Future` API, `wait(FIRST_COMPLETED)`, `shutdown`, worker counts | 10.3 follow-ups |
+| Lock, RLock, Semaphore, deadlock, daemon threads, sharing data between processes | 10.8 (new) |
+| `gather(return_exceptions=True)`, `create_task`, `as_completed`, async generators/context managers, `asyncio.Semaphore`, async retry | 10.9 (new) |
+| `model_validator`, `from_attributes`, `Field` constraints | 12.2 follow-ups |
+| Custom `RequestValidationError` handler, catch-all handler | 12.4 follow-up |
+| `GZipMiddleware`, `TrustedHostMiddleware`, middleware styles | 12.5 follow-up |
+| Role-based access (403) with chained dependencies | 12.7 follow-up |
+| Request lifecycle, path/query/body/header/cookie, PUT vs PATCH, `response_model`, response classes | 12.14 (new) |
+| Practice problems: de-duplication, frequency, reverse; utility functions; payment system / user service design | 18 (new) |
+
 
 ---
 
