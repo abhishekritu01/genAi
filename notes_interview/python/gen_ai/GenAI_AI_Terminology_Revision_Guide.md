@@ -116,9 +116,62 @@ Almost every example uses **one imaginary product**:
 - **Example:** Window = 100k. System prompt 2k + history 20k + docs 30k + tool outputs 10k = 62k used → only **38k left** for the answer and any extra context.
 - **Why it matters:** When you run out, you must trim, summarize, or retrieve less. This is why **context engineering** exists.
 
-### Inference
-- **Definition:** **Using** a trained model to produce output (as opposed to training it). Weights are frozen.
+### Inference ⭐
+- **Definition:** **Using** a trained model to produce output (as opposed to training it). Weights are **frozen**: the model does not learn anything new from your request.
+- **Simple analogy:** Training = a student **studying** for months. Inference = the student **writing the exam**. Studying is slow and expensive and happens once; the exam happens every time someone asks a question.
 - **Example:** Every customer message to HelpDesk-AI that gets a reply = one inference call.
+  - Customer: "How do I reset my password?" → model reads the prompt → generates the answer token by token → reply sent.
+  - The model does **not** remember this chat next time unless you send the history again (memory is your app's job, not the model's).
+
+**Diagram: training happens once, inference happens on every request**
+
+```mermaid
+flowchart LR
+    subgraph T["🎓 TRAINING (once, very expensive)"]
+        D[("📚 Huge dataset<br/>books, web, code")] --> TR["Model learns<br/>(weights change)"]
+    end
+    TR --> M["🧠 Trained model<br/>(weights FROZEN)"]
+    subgraph I["⚡ INFERENCE (every request, cheap per call)"]
+        U["👤 Customer:<br/>How do I reset<br/>my password?"] --> P["📝 Prompt =<br/>system prompt +<br/>history + question"]
+        P --> M
+        M --> G["Generate answer<br/>token by token:<br/>Go → to → Settings → ..."]
+        G --> R["💬 Reply sent<br/>to customer"]
+    end
+```
+
+**Diagram: one inference call, step by step**
+
+```mermaid
+sequenceDiagram
+    participant C as 👤 Customer
+    participant A as 🖥️ HelpDesk-AI app
+    participant M as 🧠 LLM (frozen)
+    C->>A: "How do I reset my password?"
+    A->>A: Build prompt (system prompt + chat history + question)
+    A->>M: Send prompt (≈1,500 input tokens)
+    loop Next-token prediction
+        M-->>A: stream next token ("Go", "to", "Settings", ...)
+    end
+    A-->>C: Show answer as it streams (≈300 output tokens)
+    Note over M: Model learned nothing.<br/>Next request starts fresh.
+```
+
+| | Training | Inference |
+|---|---|---|
+| What happens | Model **learns** (weights change) | Model **answers** (weights fixed) |
+| How often | Once / occasionally | Every user request |
+| Cost | Very high, upfront (GPUs for weeks) | Small per call, but adds up at scale |
+| Who does it | Model provider (or you, for fine-tuning) | Your app, via API or self-hosted model |
+
+- **What affects inference cost and speed:**
+  - **Input tokens** (prompt + history + docs) and **output tokens** (answer length); output tokens are usually slower and pricier.
+  - **Model size:** a frontier model costs more per call than an SLM.
+  - **Latency:** time to first token (TTFT) + time to generate the rest.
+- **Use case:** HelpDesk-AI gets **50,000 messages/day**. Each call ≈ 1,500 input + 300 output tokens. Inference is the **ongoing running cost**, so the team:
+  - Routes simple questions ("What are your hours?") to a **cheap SLM**, hard ones to a bigger model.
+  - **Caches** the fixed system prompt (prompt caching) to cut repeated input cost.
+  - **Streams** the answer so the customer sees text immediately instead of waiting.
+- **Interview tip:** "Training cost is paid once; **inference cost is paid on every request**, so in production I optimize inference: smaller models where possible, shorter prompts, caching, and streaming."
 
 ### Model Types
 
