@@ -168,7 +168,7 @@ sequenceDiagram
   - **Model size:** a frontier model costs more per call than an SLM.
   - **Latency:** time to first token (TTFT) + time to generate the rest.
 - **Use case:** HelpDesk-AI gets **50,000 messages/day**. Each call ≈ 1,500 input + 300 output tokens. Inference is the **ongoing running cost**, so the team:
-  - Routes simple questions ("What are your hours?") to a **cheap SLM**, hard ones to a bigger model.
+  - Routes simple questions ("What are your hours?") to a **cheap SLM**, hard ones to a bigger model (how it works: [Model Routing vs Cascading](#model-routing-vs-cascading-)).
   - **Caches** the fixed system prompt (prompt caching) to cut repeated input cost.
   - **Streams** the answer so the customer sees text immediately instead of waiting.
 - **Interview tip:** "Training cost is paid once; **inference cost is paid on every request**, so in production I optimize inference: smaller models where possible, shorter prompts, caching, and streaming."
@@ -187,12 +187,102 @@ sequenceDiagram
 ### Hallucination ⭐
 - **Definition:** Fluent output that is **unsupported or false**. The model isn't "lying"; it generates plausible text.
 - **Example:** Customer asks about refunds. Model confidently says "refunds within 90 days"; the real policy is 30 days, which it never saw.
+- **Why it happens:** The model predicts the *most likely next words*, not the *true* ones. If it never saw the answer (or saw it rarely), it still produces something that **sounds** right.
 - **Fixes:**
-  - Grounding with **RAG + citations**
-  - **Structured output** (values come from tools, not memory)
-  - Instruction: "Say I don't know if the context doesn't contain it"
-  - **Faithfulness evals**
-  - **Human review** for high-stakes cases
+
+| Fix | What it means (simple) | Example in HelpDesk-AI |
+|---|---|---|
+| **Grounding with RAG + citations** | **Grounding** = make the model answer *from given facts*, not from memory. **RAG** (Retrieval-Augmented Generation) = search your documents first, paste the relevant parts into the prompt. **Citations** = the answer must point to which document it used, so anyone can check it | Question: "Refund window?" → app finds *Refund Policy v3: "refunds within 30 days"* → model answers "30 days **[Refund Policy v3]**". No source found → no made-up number |
+| **Structured output** (values come from tools, not memory) | Model fills a fixed format (e.g. JSON). Real values like prices, dates, order status come from a **tool/database call**, never from the model guessing | `{"order_id": "A123", "status": <from orders DB>}` → model can't invent "Shipped" if DB says "Pending" |
+| **"Say I don't know" instruction** | Tell the model in the system prompt it's **allowed to say it doesn't know**. Without this, models tend to always give *some* answer | System prompt: "If the answer isn't in the context, reply: *I'm not sure, let me connect you to an agent.*" |
+| **Faithfulness evals** | An **automatic test** that checks: *is every claim in the answer supported by the retrieved context?* Usually done by a second model (**LLM-as-judge**) on a test set of questions. Gives a score, e.g. 95% faithful | Context says "30 days", answer says "90 days" → judge marks **unfaithful** ❌. Run on 500 test questions before every release; block release if score drops |
+| **Human review** for high-stakes cases | A person checks the answer **before** it reaches the customer, only where a mistake is costly | Refunds > $500, legal or medical topics → draft goes to a support agent to approve |
+
+```mermaid
+flowchart LR
+    Q["👤 Question:<br/>Refund window?"] --> R["🔍 RAG: search docs"]
+    R --> C["📄 Refund Policy v3:<br/>'within 30 days'"]
+    C --> M["🧠 LLM answers<br/>ONLY from this context"]
+    M --> A["💬 '30 days [Refund Policy v3]'"]
+    A --> E{"✅ Faithfulness check:<br/>claim in context?"}
+    E -- yes --> S["Send to customer"]
+    E -- no --> H["Block / human review"]
+```
+
+**Diagram 1: Without grounding vs with grounding (RAG + citations)**
+
+```mermaid
+flowchart LR
+    subgraph BAD["❌ Without grounding"]
+        Q1["Refund window?"] --> M1["🧠 LLM guesses<br/>from memory"]
+        M1 --> A1["'90 days'<br/>(made up, no source)"]
+    end
+    subgraph GOOD["✅ With RAG + citations"]
+        Q2["Refund window?"] --> R2["🔍 Search docs"]
+        R2 --> D2["📄 Refund Policy v3"]
+        D2 --> M2["🧠 LLM reads doc"]
+        M2 --> A2["'30 days<br/>[Refund Policy v3]'"]
+    end
+```
+
+**Diagram 2: Structured output (values come from tools, not memory)**
+
+```mermaid
+flowchart LR
+    Q["👤 Where is order A123?"] --> M["🧠 LLM decides:<br/>call get_order('A123')"]
+    M --> T["🛠️ Tool → Orders DB"]
+    T --> V["status: 'Pending'<br/>eta: 'Nov 14'"]
+    V --> J["📋 JSON filled with REAL values<br/>{status: Pending, eta: Nov 14}"]
+    J --> A["💬 'Your order is pending,<br/>arriving Nov 14'"]
+```
+
+**Diagram 3: "Say I don't know" instruction**
+
+```mermaid
+flowchart TD
+    Q["👤 Do you ship to Mars?"] --> R["🔍 Search docs"]
+    R --> C{"Answer found<br/>in context?"}
+    C -- yes --> A["💬 Answer + citation"]
+    C -- no --> N["💬 'I'm not sure, let me<br/>connect you to an agent'"]
+```
+
+**Diagram 4: Faithfulness eval (testing before release)**
+
+```mermaid
+flowchart LR
+    TS["📝 Test set<br/>500 questions"] --> APP["🖥️ Run HelpDesk-AI"]
+    APP --> OUT["Answer + retrieved context<br/>for each question"]
+    OUT --> J["⚖️ Judge LLM:<br/>is every claim<br/>supported by context?"]
+    J --> SC["📊 Score: 95% faithful"]
+    SC --> G{"Score ≥ target?"}
+    G -- yes --> REL["🚀 Release"]
+    G -- no --> FIX["🔧 Block release, fix prompt/RAG"]
+```
+
+**Diagram 5: Human review (only for high-stakes cases)**
+
+```mermaid
+flowchart TD
+    A["💬 Draft answer"] --> R{"High stakes?<br/>refund > $500, legal, medical"}
+    R -- no --> S["Send to customer directly"]
+    R -- yes --> H["👩‍💼 Support agent reviews"]
+    H -- approve --> S
+    H -- edit / reject --> E["Agent fixes and sends"]
+```
+
+**Big picture: all fixes are layers of defense**
+
+```mermaid
+flowchart LR
+    Q["👤 Question"] --> L1["1️⃣ RAG grounding<br/>give real facts"]
+    L1 --> L2["2️⃣ Tools + structured output<br/>exact values"]
+    L2 --> L3["3️⃣ 'I don't know' allowed<br/>no forced guessing"]
+    L3 --> L4["4️⃣ Faithfulness check<br/>claims match context?"]
+    L4 --> L5["5️⃣ Human review<br/>if high stakes"]
+    L5 --> A["✅ Safe answer"]
+```
+
+- **Interview tip:** "You can't fully remove hallucination, so I **layer defenses**: ground answers with RAG and citations, pull exact values from tools, let the model say 'I don't know', measure faithfulness with evals before each release, and add human review where errors are expensive."
 
 ### Knowledge Cutoff
 - **Definition:** The date after which the model has **no training data**.
@@ -1458,6 +1548,85 @@ flowchart LR
 | **Definition** | Pick a model **per request up front** by task, cost, latency, quality | Try the **cheap model first**; **escalate** if confidence is low or validation fails |
 | **Example** | Greeting → small model; billing-dispute analysis → strong model | SLM answers; grader says "uncertain" → re-run on stronger model |
 | **Benefit** | Right-size every request | Most traffic never needs the expensive model |
+
+#### How SLM + LLM work together (simple explanation)
+
+**Analogy: a hospital.** The **receptionist** (cheap, fast) answers "Where's the cafeteria?" directly. Only real medical problems go to the **specialist doctor** (expensive, slow). Sending everyone to the specialist wastes money and makes everyone wait.
+
+- **SLM (small model)** = receptionist → easy, common questions.
+- **LLM (big model)** = specialist → hard, multi-step, sensitive problems.
+- **Router** = the step that decides who handles each message.
+
+```mermaid
+flowchart TD
+    U["👤 Customer message"] --> R{"🔀 ROUTER<br/>Easy or hard?"}
+    R -- easy --> S["⚡ SLM<br/>cheap + fast"]
+    R -- hard --> L["🧠 LLM<br/>expensive + smart"]
+    S --> A["💬 Reply to customer"]
+    L --> A
+```
+
+| Message | Router decides | Why |
+|---|---|---|
+| "What are your hours?" | SLM | Fixed fact, short answer |
+| "How do I reset my password?" | SLM | Standard steps from the FAQ |
+| "Charged twice on Jan 3 and Jan 5: duplicate or proration?" | LLM | Needs reasoning over billing rules |
+| "Your app deleted my data, I want a refund + compensation" | LLM | Complicated and sensitive |
+
+**3 ways to build the router (simplest → smartest)**
+
+**1. Keyword rules (no AI)**
+```python
+def route(message):
+    easy_words = ["hours", "password", "reset", "address", "contact"]
+    if any(word in message.lower() for word in easy_words):
+        return "SLM"
+    return "LLM"
+```
+✅ Free and instant. ❌ Easy to fool: "I reset my password **and got charged twice**" contains "password" but is really a billing problem.
+
+**2. SLM classifies first (most common, = routing)**
+```python
+def handle(message):
+    # Step 1: cheap model only LABELS the message (1-word answer → very cheap)
+    label = call_model("small-model",
+        f"Classify as EASY or HARD. Reply with one word.\nMessage: {message}")
+
+    # Step 2: send to the right model
+    if label == "EASY":
+        return call_model("small-model", message)
+    return call_model("big-model", message)
+```
+✅ Understands meaning, not just keywords.
+
+**3. Try SLM first, escalate if unsure (= cascading)**
+```python
+def handle(message):
+    answer = call_model("small-model",
+        f"Answer the question. If you are not sure, reply only: ESCALATE\n{message}")
+    if "ESCALATE" in answer:
+        return call_model("big-model", message)   # big model takes over
+    return answer
+```
+✅ Big model used only when truly needed. ❌ Hard questions are slower (two calls).
+
+**Why it's worth it (example prices, made up to show the idea)**
+
+HelpDesk-AI: 50,000 messages/day × (1,500 input + 300 output tokens) = **75M input + 15M output tokens/day**.
+
+| Setup | Daily cost |
+|---|---|
+| Everything → LLM ($3/M input, $15/M output) | 225 + 225 = **$450/day** |
+| Everything → SLM ($0.25/M input, $1.25/M output) | ≈ $37.50/day, but **hard questions get bad answers** ❌ |
+| **Router: 70% SLM, 30% LLM** (+ ≈$19 for router calls) | 26 + 135 + 19 ≈ **$180/day** ✅ |
+
+→ About **60% cheaper**, hard questions still get the strong model, and easy questions get **faster** replies.
+
+**The two other cost/speed tricks, in one line each**
+- **Prompt caching:** the system prompt is identical on all 50,000 calls → the provider stores it once and charges much less on reuse; you pay full price only for the new part (the customer's question). See [Prompt Caching](#prompt-caching).
+- **Streaming:** the model writes one token at a time anyway; streaming shows each token as soon as it's ready → text appears in ~0.5s instead of a 5s spinner. Same total time, but it **feels** fast.
+
+**Interview tip:** "I put a router in front of the models. A cheap SLM classifies each message: easy ones are answered by the SLM, hard ones escalate to the bigger model. Most traffic is easy, so this cuts inference cost a lot without hurting quality on the hard cases."
 
 ### RAG vs Fine-Tuning (very common question) ⭐
 
